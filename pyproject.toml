@@ -11,7 +11,7 @@ maintainers = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "aiohttp==3.10.11",
+    "aiohttp==3.12.14",
     "asyncio>=3.4.3",
     "botbuilder-core>=4.17.0",
     "botbuilder-integration-aiohttp>=4.17.0",
