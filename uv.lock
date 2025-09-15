@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 
 [[package]]
@@ -1021,7 +1021,7 @@ cli = [
 
 [[package]]
 name = "mcp-teams-server"
-version = "1.0.5"
+version = "1.0.6"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -1233,7 +1233,7 @@ wheels = [
 
 [[package]]
 name = "msgraph-sdk"
-version = "1.38.0"
+version = "1.44.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-identity" },
@@ -1243,9 +1243,9 @@ dependencies = [
     { name = "microsoft-kiota-serialization-text" },
     { name = "msgraph-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/10/4a/1231a710be05849b8f2c2ce484dcc5a84066bbbc01e8e2c0e7b812a8909c/msgraph_sdk-1.38.0.tar.gz", hash = "sha256:4bb5b30515e64de1e507641f923a348ce83bacb52e2703bb941c144a319c4ca7", size = 6085852, upload-time = "2025-07-17T01:14:36.377Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/85/5a30014f865cbda231e3abd0b1776d08e45a4b4ac6d2824130408a65837b/msgraph_sdk-1.44.0.tar.gz", hash = "sha256:7808cc40514182de07d4e121d096cd2aa11655713cd4ccb05722c945845998d7", size = 6051572, upload-time = "2025-09-11T18:38:44.049Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/79/a97b43015afd7112b6f6b0ec1cc65fd06d4f0a9f6737427ba6faf1d5aed4/msgraph_sdk-1.38.0-py3-none-any.whl", hash = "sha256:a6c4725085323152581ed9c9b3433b3f4b6a2e3365a2674354c78a72da8bce9a", size = 24989016, upload-time = "2025-07-17T01:14:32.033Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/ed/ee2ef170b11f48f3b76d136f0cf36c57fdf65c7f5ae01badd17c54d88ca1/msgraph_sdk-1.44.0-py3-none-any.whl", hash = "sha256:14f47ef1326e26b346fcda695d47ad3d8920f5234c71eae6eba970152f5d66d5", size = 24775012, upload-time = "2025-09-11T18:38:40.949Z" },
 ]
 
 [[package]]
