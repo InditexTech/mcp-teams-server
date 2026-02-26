@@ -1,9 +1,10 @@
-name: Sonar Cloud Analysis
+name: Tests
+
 permissions:
   contents: read
 
 concurrency:
-  group: sonarcloud-${{ github.ref }}
+  group: tests-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -17,7 +18,7 @@ on:
 
 jobs:
   unit-tests:
-    name: SonarCloud / Unit Tests
+    name: Tests
     timeout-minutes: 30
     if: ${{ ((github.event.pull_request.merged == true && github.base_ref == 'master') ||
       (github.event_name == 'workflow_dispatch' ||
@@ -53,31 +54,3 @@ jobs:
           TEST_THREAD_ID: ${{ vars.TEST_THREAD_ID }}
           TEST_MESSAGE_ID: ${{ vars.TEST_MESSAGE_ID }}
           TEST_USER_NAME: ${{ vars.TEST_USER_NAME }}
-
-      - name: Store project information
-        shell: bash
-        id: version
-        run: |
-          VERSION=$(uv run pyproject-info project.version | tr -d '"'); echo "app-version=$VERSION" >> "$GITHUB_OUTPUT"
-          NAME=$(uv run pyproject-info project.name | tr -d '"'); echo "app-name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "github-repository=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)" >> "$GITHUB_OUTPUT"
-
-      - name: SonarCloud / Run SonarCloud action
-        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5
-        if: ${{ env.IS_INDITEXTECH_REPO == 'false' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=inditextech
-            -Dsonar.projectKey=InditexTech_${{ steps.version.outputs.github-repository }}
-            -Dsonar.projectName=${{ steps.version.outputs.app-name }}
-            -Dsonar.projectVersion=${{ steps.version.outputs.app-version }}
-            -Dsonar.branch.name=${{ github.base_ref || github.ref_name }}
-            -Dsonar.host.url="https://sonarcloud.io/"
-            -Dsonar.verbose=true
-            -Dsonar.token=${SONAR_TOKEN}
-            -Dsonar.python.version=3.10
-            -Dsonar.python.coverage.reportPaths=coverage*.xml
