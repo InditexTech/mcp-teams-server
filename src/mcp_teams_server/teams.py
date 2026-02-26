@@ -138,11 +138,14 @@ class TeamsClient:
             async def start_thread_callback(context: TurnContext):
                 mention_member = None
                 if member_name is not None:
-                    continuation_token = None
-                    members = await TeamsInfo.get_paged_team_members(context, self.team_id, 10, continuation_token)
-                    for member in members.members:
-                        if member.name == member_name:
-                            mention_member = member
+                    continuation_token = ""
+                    try:
+                        members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10, continuation_token)
+                        for member in members.members:
+                            if member.name == member_name:
+                                mention_member = member
+                    except Exception as e:
+                        LOGGER.error(e)
 
                 mentions = []
                 if mention_member is not None:
@@ -208,11 +211,14 @@ class TeamsClient:
             async def update_thread_callback(context: TurnContext):
                 mention_member = None
                 if member_name is not None:
-                    continuation_token = None
-                    members = await TeamsInfo.get_paged_team_members(context, self.team_id, 10, continuation_token)
-                    for member in members.members:
-                        if member.name == member_name:
-                            mention_member = member
+                    continuation_token = ""
+                    try:
+                        members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10, continuation_token)
+                        for member in members.members:
+                            if member.name == member_name:
+                                mention_member = member
+                    except Exception as e:
+                        LOGGER.error(f"Error getting member name {member_name}: {e}")
 
                 mentions = []
                 if mention_member is not None:
@@ -422,10 +428,13 @@ class TeamsClient:
             result = []
 
             async def list_members_callback(context: TurnContext):
-                continuation_token = None
-                members = await TeamsInfo.get_paged_team_members(context, self.team_id, 10,continuation_token)
-                for member in members.members:
-                    result.append(TeamsMember(name=member.name, email=member.email))
+                continuation_token = ""
+                try:
+                    members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10,continuation_token)
+                    for member in members.members:
+                        result.append(TeamsMember(name=member.name, email=member.email))
+                except Exception as e:
+                    LOGGER.error(f"Error getting members: {str(e)}")
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
