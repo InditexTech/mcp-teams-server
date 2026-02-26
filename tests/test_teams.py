@@ -6,10 +6,8 @@ import sys
 
 import pytest
 from azure.identity.aio import ClientSecretCredential
-from botbuilder.integration.aiohttp import (
-    CloudAdapter,
-    ConfigurationBotFrameworkAuthentication,
-)
+from microsoft_agents.authentication.msal import MsalConnectionManager
+from microsoft_agents.hosting.aiohttp import CloudAdapter
 from dotenv import load_dotenv
 from msgraph.graph_service_client import GraphServiceClient
 
@@ -32,19 +30,18 @@ LOGGER = logging.getLogger(__name__)
 def setup_teams_client() -> TeamsClient:
     # Cloud adapter
     config = BotConfiguration()
-    adapter = CloudAdapter(
-        ConfigurationBotFrameworkAuthentication(config, logger=LOGGER)
-    )
+    connection_manager = MsalConnectionManager(**config)
+    adapter = CloudAdapter(connection_manager=connection_manager)
 
     # Graph client
     credentials = ClientSecretCredential(
-        config.APP_TENANTID, config.APP_ID, config.APP_PASSWORD
+        config["APP_TENANT_ID"], config["APP_ID"], config["APP_PASSWORD"]
     )
     scopes = ["https://graph.microsoft.com/.default"]
     graph_client = GraphServiceClient(credentials=credentials, scopes=scopes)
 
     return TeamsClient(
-        adapter, graph_client, config.APP_ID, config.TEAM_ID, config.TEAMS_CHANNEL_ID
+        adapter, graph_client, config["APP_ID"], config["TEAM_ID"], config["TEAMS_CHANNEL_ID"]
     )
 
 

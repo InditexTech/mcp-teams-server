@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.6"
+version = "1.0.7"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
@@ -11,14 +11,15 @@ maintainers = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "aiohttp==3.10.11",
-    "asyncio>=3.4.3",
-    "botbuilder-core>=4.17.0",
-    "botbuilder-integration-aiohttp>=4.17.0",
+    "microsoft-agents-authentication-msal>=0.7.0",
+    "microsoft-agents-activity>=0.7.0",
+    "microsoft-agents-hosting-core>=0.7.0",
+    "microsoft-agents-hosting-teams>=0.7.0",
+    "microsoft-agents-hosting-aiohttp>=0.7.0",
     "dotenv>=0.9.9",
-    "mcp[cli]>=1.12.0",
-    "msgraph-sdk>=1.37.0",
-    "multidict>=6.6.3",
+    "mcp[cli]>=1.13.1",
+    "msgraph-sdk>=1.46.0",
+    "multidict>=6.6.4",
 ]
 
 [project.urls]
@@ -36,12 +37,12 @@ build-backend = "hatchling.build"
 dev = [
     "mock>=5.2.0",
     "pyproject-parser[cli]>=0.13.0",
-    "pyright>=1.1.398",
-    "pytest>=8.3.5",
+    "pyright>=1.1.404",
+    "pytest>=8.4.1",
     "pytest-asyncio>=0.25.3",
-    "pytest-cov>=6.0.0",
+    "pytest-cov>=6.2.1",
     "reuse>=5.0.2",
-    "ruff>=0.11.2",
+    "ruff>=0.12.10",
 ]
 
 [tool.ruff]
