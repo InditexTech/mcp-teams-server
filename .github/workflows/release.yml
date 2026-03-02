@@ -10,8 +10,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME: ${{ secrets.DIST_PLAT_DEPLOYER_USERNAME }}
-  UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD: ${{ secrets.DIST_PLAT_DEPLOYER_TOKEN }}
+  DP_USERNAME: ${{ secrets.DIST_PLAT_DEPLOYER_USERNAME }}
+  DP_TOKEN: ${{ secrets.DIST_PLAT_DEPLOYER_TOKEN }}
   UV_DEFAULT_INDEX: inditex-artifacts-public=https://inditex.jfrog.io/artifactory/api/pypi/python-public/simple
 
 jobs:
@@ -34,11 +34,16 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
+          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
+          uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Retrieve version
         shell: bash
         run: |
+          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
+          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           VERSION=$(uv run pyproject-info project.version | tr -d '"'); echo "VERSION=v$VERSION" >> "$GITHUB_ENV"
 
       - name: Create Git Tag
@@ -80,6 +85,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          secret-envs: UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}",UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174 # v1
