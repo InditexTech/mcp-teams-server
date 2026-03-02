@@ -15,6 +15,11 @@ on:
     types:
       - published
 
+env:
+  UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME: ${{ secrets.DIST_PLAT_DEPLOYER_USERNAME }}
+  UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD: ${{ secrets.DIST_PLAT_DEPLOYER_TOKEN }}
+  UV_DEFAULT_INDEX: inditex-artifacts-public=https://inditex.jfrog.io/artifactory/api/pypi/python-public/simple
+
 jobs:
   unit-tests:
     name: SonarCloud / Unit Tests

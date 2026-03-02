@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from importlib import metadata
 
 from azure.identity.aio import ClientSecretCredential
-from microsoft_agents.authentication.msal import MsalConnectionManager
-from microsoft_agents.hosting.aiohttp import CloudAdapter
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
+from microsoft_agents.authentication.msal import MsalConnectionManager
+from microsoft_agents.hosting.aiohttp import CloudAdapter
 from msgraph.graph_service_client import GraphServiceClient
 from pydantic import Field
 

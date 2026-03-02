@@ -6,9 +6,9 @@ import sys
 
 import pytest
 from azure.identity.aio import ClientSecretCredential
+from dotenv import load_dotenv
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
-from dotenv import load_dotenv
 from msgraph.graph_service_client import GraphServiceClient
 
 from mcp_teams_server.config import BotConfiguration
@@ -41,7 +41,11 @@ def setup_teams_client() -> TeamsClient:
     graph_client = GraphServiceClient(credentials=credentials, scopes=scopes)
 
     return TeamsClient(
-        adapter, graph_client, config["APP_ID"], config["TEAM_ID"], config["TEAMS_CHANNEL_ID"]
+        adapter,
+        graph_client,
+        config["APP_ID"],
+        config["TEAM_ID"],
+        config["TEAMS_CHANNEL_ID"],
     )
 
 

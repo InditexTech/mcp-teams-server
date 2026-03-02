@@ -2,19 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 
-from microsoft_agents.hosting.core import TurnContext
-from microsoft_agents.hosting.core.connector.client.connector_client import ConversationsOperations
-from microsoft_agents.hosting.aiohttp import CloudAdapter
-from microsoft_agents.hosting.teams import TeamsInfo
+from kiota_abstractions.base_request_configuration import RequestConfiguration
 from microsoft_agents.activity import (
     Activity,
     ChannelAccount,
-    ConversationAccount
+    ConversationAccount,
+    Mention,
 )
 from microsoft_agents.activity.activity_types import ActivityTypes
-from microsoft_agents.activity import Mention
 from microsoft_agents.activity.text_format_types import TextFormatTypes
-from kiota_abstractions.base_request_configuration import RequestConfiguration
+from microsoft_agents.hosting.aiohttp import CloudAdapter
+from microsoft_agents.hosting.core import TurnContext
+from microsoft_agents.hosting.core.connector.client.connector_client import (
+    ConversationsOperations,
+)
+from microsoft_agents.hosting.teams import TeamsInfo
 from msgraph.generated.models.chat_message import ChatMessage
 from msgraph.generated.teams.item.channels.item.messages.item.chat_message_item_request_builder import (
     ChatMessageItemRequestBuilder,
@@ -140,7 +142,9 @@ class TeamsClient:
                 if member_name is not None:
                     continuation_token = ""
                     try:
-                        members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10, continuation_token)
+                        members = await TeamsInfo.get_paged_team_members(
+                            context, self.teams_channel_id, 10, continuation_token
+                        )
                         for member in members.members:
                             if member.name == member_name:
                                 mention_member = member
@@ -213,7 +217,9 @@ class TeamsClient:
                 if member_name is not None:
                     continuation_token = ""
                     try:
-                        members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10, continuation_token)
+                        members = await TeamsInfo.get_paged_team_members(
+                            context, self.teams_channel_id, 10, continuation_token
+                        )
                         for member in members.members:
                             if member.name == member_name:
                                 mention_member = member
@@ -235,9 +241,7 @@ class TeamsClient:
                 reply = Activity(
                     type=ActivityTypes.message,
                     text=result.content,
-                    from_property=ChannelAccount(
-                        id=self.teams_app_id, name="MCP Bot"
-                    ),
+                    from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"),
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
@@ -430,7 +434,9 @@ class TeamsClient:
             async def list_members_callback(context: TurnContext):
                 continuation_token = ""
                 try:
-                    members = await TeamsInfo.get_paged_team_members(context, self.teams_channel_id, 10,continuation_token)
+                    members = await TeamsInfo.get_paged_team_members(
+                        context, self.teams_channel_id, 10, continuation_token
+                    )
                     for member in members.members:
                         result.append(TeamsMember(name=member.name, email=member.email))
                 except Exception as e:

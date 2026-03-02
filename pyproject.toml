@@ -11,15 +11,15 @@ maintainers = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "microsoft-agents-authentication-msal>=0.7.0",
-    "microsoft-agents-activity>=0.7.0",
-    "microsoft-agents-hosting-core>=0.7.0",
-    "microsoft-agents-hosting-teams>=0.7.0",
-    "microsoft-agents-hosting-aiohttp>=0.7.0",
-    "dotenv>=0.9.9",
-    "mcp[cli]>=1.13.1",
-    "msgraph-sdk>=1.46.0",
-    "multidict>=6.6.4",
+    "microsoft-agents-authentication-msal>=0.8.0",
+    "microsoft-agents-activity>=0.8.0",
+    "microsoft-agents-hosting-core>=0.8.0",
+    "microsoft-agents-hosting-teams>=0.8.0",
+    "microsoft-agents-hosting-aiohttp>=0.8.0",
+    "python-dotenv>=1.2.1",
+    "mcp[cli]==1.24.0",
+    "msgraph-sdk>=1.55.0",
+    "setuptools>=82.0.0",
 ]
 
 [project.urls]
@@ -44,6 +44,17 @@ dev = [
     "reuse>=5.0.2",
     "ruff>=0.12.10",
 ]
+
+[tool.uv]
+package = true
+
+[tool.uv.extra-build-dependencies]
+mcp-teams-server = ["setuptools"]
+
+[[tool.uv.index]]
+name = "inditex-artifacts-public"
+url = "https://inditex.jfrog.io/artifactory/api/pypi/python-public/simple"
+default = true
 
 [tool.ruff]
 line-length = 88
