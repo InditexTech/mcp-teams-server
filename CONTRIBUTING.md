@@ -6,9 +6,9 @@ this project.
 
 ## Prerequisites
 
-- Before starting to contribute to the code, you must first sign the
-  [Contributor License Agreement (CLA)](https://github.com/InditexTech/foss/blob/main/documents/CLA.pdf).
-  Detailed instructions on how to proceed can be found [here](https://github.com/InditexTech/foss/blob/main/CONTRIBUTING.md).
+- Before starting to contribute to the code, you must first sign the Contributor License Agreement (CLA). Detailed
+  instructions on how to proceed can be found in the
+  [FOSS contributing guidelines](https://github.com/InditexTech/foss/blob/main/CONTRIBUTING.md).
 
 ## How to Contribute
 
