@@ -1,10 +1,7 @@
 # SPDX-FileCopyrightText: 2025 INDUSTRIA DE DISEÑO TEXTIL, S.A. (INDITEX, S.A.)
 # SPDX-License-Identifier: Apache-2.0
 import os
-from dataclasses import dataclass
 
-
-@dataclass
 class BotConfiguration(dict):
     def __init__(self):
         super().__init__()
