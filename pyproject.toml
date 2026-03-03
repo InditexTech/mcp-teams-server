@@ -51,11 +51,6 @@ package = true
 [tool.uv.extra-build-dependencies]
 mcp-teams-server = ["setuptools"]
 
-[[tool.uv.index]]
-name = "inditex-artifacts-public"
-url = "https://inditex.jfrog.io/artifactory/api/pypi/python-public/simple"
-default = true
-
 [tool.ruff]
 line-length = 88
 target-version = "py310"

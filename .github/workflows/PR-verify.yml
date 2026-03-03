@@ -6,10 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  DP_USERNAME: ${{ secrets.DIST_PLAT_DEPLOYER_USERNAME }}
-  DP_TOKEN: ${{ secrets.DIST_PLAT_DEPLOYER_TOKEN }}
-  UV_DEFAULT_INDEX: inditex-artifacts-public=https://inditex.jfrog.io/artifactory/api/pypi/python-public/simple
 
 jobs:
   check-format:
@@ -27,14 +23,10 @@ jobs:
 
       - name: Sync project
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Ruff format check
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv run --no-sync ruff check .
 
   check-typing:
@@ -52,14 +44,10 @@ jobs:
 
       - name: Sync project
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Pyright type checking
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv run --no-sync pyright
 
   run-tests:
@@ -77,14 +65,10 @@ jobs:
 
       - name: Sync project
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Unit tests execution
         run: |
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_USERNAME="${DP_USERNAME}"
-          export UV_INDEX_INDITEX_ARTIFACTS_PUBLIC_PASSWORD="${DP_TOKEN}"
           uv run pytest
 
   repo-linter:
