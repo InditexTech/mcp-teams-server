@@ -6,6 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
 
+
 jobs:
   check-format:
     runs-on: ubuntu-latest
@@ -21,10 +22,12 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Ruff format check
-        run: uv run --no-sync ruff check .
+        run: |
+          uv run --no-sync ruff check .
 
   check-typing:
     runs-on: ubuntu-latest
@@ -40,10 +43,12 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Pyright type checking
-        run: uv run --no-sync pyright
+        run: |
+          uv run --no-sync pyright
 
   run-tests:
     runs-on: ubuntu-latest
@@ -59,10 +64,12 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Unit tests execution
-        run: uv run pytest
+        run: |
+          uv run pytest
 
   repo-linter:
     name: Repo Linter

@@ -9,12 +9,10 @@ from dataclasses import dataclass
 from importlib import metadata
 
 from azure.identity.aio import ClientSecretCredential
-from botbuilder.integration.aiohttp import (
-    CloudAdapter,
-    ConfigurationBotFrameworkAuthentication,
-)
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
+from microsoft_agents.authentication.msal import MsalConnectionManager
+from microsoft_agents.hosting.aiohttp import CloudAdapter
 from msgraph.graph_service_client import GraphServiceClient
 from pydantic import Field
 
@@ -67,11 +65,12 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
     # Bot adapter construction
     bot_config = BotConfiguration()
-    adapter = CloudAdapter(ConfigurationBotFrameworkAuthentication(bot_config))
+    connection_manager = MsalConnectionManager(**bot_config)
+    adapter = CloudAdapter(connection_manager=connection_manager)
 
     # Graph client construction
     credentials = ClientSecretCredential(
-        bot_config.APP_TENANTID, bot_config.APP_ID, bot_config.APP_PASSWORD
+        bot_config["APP_TENANT_ID"], bot_config["APP_ID"], bot_config["APP_PASSWORD"]
     )
     scopes = ["https://graph.microsoft.com/.default"]
     graph_client = GraphServiceClient(credentials=credentials, scopes=scopes)
@@ -79,9 +78,9 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     client = TeamsClient(
         adapter,
         graph_client,
-        bot_config.APP_ID,
-        bot_config.TEAM_ID,
-        bot_config.TEAMS_CHANNEL_ID,
+        bot_config["APP_ID"],
+        bot_config["TEAM_ID"],
+        bot_config["TEAMS_CHANNEL_ID"],
     )
     yield AppContext(client=client)
 

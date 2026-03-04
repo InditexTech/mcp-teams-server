@@ -2,21 +2,22 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 
-from botbuilder.core import BotAdapter, TurnContext
-from botbuilder.core.teams import TeamsInfo
-from botbuilder.integration.aiohttp import CloudAdapter
-from botbuilder.schema import (
+from kiota_abstractions.base_request_configuration import RequestConfiguration
+from microsoft_agents.activity import (
     Activity,
-    ActivityTypes,
     ChannelAccount,
     ConversationAccount,
-    ConversationReference,
     Mention,
-    TextFormatTypes,
 )
-from botbuilder.schema.teams import TeamsChannelAccount
-from botframework.connector.aio.operations_async import ConversationsOperations
-from kiota_abstractions.base_request_configuration import RequestConfiguration
+from microsoft_agents.activity.activity_types import ActivityTypes
+from microsoft_agents.activity.teams import TeamsChannelAccount
+from microsoft_agents.activity.text_format_types import TextFormatTypes
+from microsoft_agents.hosting.aiohttp import CloudAdapter
+from microsoft_agents.hosting.core import TurnContext
+from microsoft_agents.hosting.core.connector.client.connector_client import (
+    ConversationsOperations,
+)
+from microsoft_agents.hosting.teams import TeamsInfo
 from msgraph.generated.models.chat_message import ChatMessage
 from msgraph.generated.teams.item.channels.item.messages.item.chat_message_item_request_builder import (
     ChatMessageItemRequestBuilder,
@@ -31,6 +32,8 @@ from msgraph.graph_service_client import GraphServiceClient
 from pydantic import BaseModel, Field
 
 LOGGER = logging.getLogger(__name__)
+
+MCP_BOT_NAME = "MCP Bot"
 
 
 class TeamsThread(BaseModel):
@@ -90,14 +93,15 @@ class TeamsClient:
         LOGGER.error(f"Error {str(error)}")
         # await context.send_activity("An error occurred in the bot, please try again later")
 
-    def _create_conversation_reference(self) -> ConversationReference:
+    def _create_continuation_activity(self) -> Activity:
         service_url = "https://smba.trafficmanager.net/emea/"
         if self.service_url is not None:
             service_url = self.service_url
-        return ConversationReference(
-            bot=TeamsChannelAccount(id=self.teams_app_id, name="MCP Bot"),
-            channel_id=self.teams_channel_id,
+        return Activity(
+            type=ActivityTypes.conversation_update,
             service_url=service_url,
+            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
+            channel_id="msteams",  # type: ignore
             conversation=ConversationAccount(
                 id=self.teams_channel_id,
                 is_group=True,
@@ -109,14 +113,31 @@ class TeamsClient:
     async def _initialize(self):
         if not self.service_url:
 
-            def context_callback(context: TurnContext):
+            async def context_callback(context: TurnContext):
                 self.service_url = context.activity.service_url
 
             await self.adapter.continue_conversation(
-                bot_app_id=self.teams_app_id,
-                reference=self._create_conversation_reference(),
+                agent_app_id=self.teams_app_id,
+                continuation_activity=self._create_continuation_activity(),
                 callback=context_callback,
             )
+
+    async def _get_mention_member(
+        self, context: TurnContext, member_name: str | None
+    ) -> TeamsChannelAccount | None:
+        mention_member = None
+        if member_name is not None:
+            continuation_token = ""
+            try:
+                members = await TeamsInfo.get_paged_team_members(
+                    context, self.teams_channel_id, 10, continuation_token
+                )
+                for member in members.members:
+                    if member.name == member_name:
+                        mention_member = member
+            except Exception as e:
+                LOGGER.exception(e)
+        return mention_member
 
     async def start_thread(
         self, title: str, content: str, member_name: str | None = None
@@ -137,12 +158,7 @@ class TeamsClient:
             result = TeamsThread(title=title, content=content, thread_id="")
 
             async def start_thread_callback(context: TurnContext):
-                mention_member = None
-                if member_name is not None:
-                    members = await TeamsInfo.get_team_members(context, self.team_id)
-                    for member in members:
-                        if member.name == member_name:
-                            mention_member = member
+                mention_member = await self._get_mention_member(context, member_name)
 
                 mentions = []
                 if mention_member is not None:
@@ -151,28 +167,35 @@ class TeamsClient:
                     )
                     mention = Mention(
                         text=f"<at>{mention_member.name}</at>",
-                        type="mention",
                         mentioned=ChannelAccount(
                             id=mention_member.id, name=mention_member.name
                         ),
                     )
                     mentions.append(mention)
 
-                response = await context.send_activity(
-                    activity_or_text=Activity(
+                try:
+                    activity = Activity(
                         type=ActivityTypes.message,
+                        from_property=ChannelAccount( id=self.teams_app_id, name=MCP_BOT_NAME), # type: ignore
+                        channel_id="msteams",  # type: ignore
+                        conversation=context.activity.conversation,
                         topic_name=title,
                         text=result.content,
                         text_format=TextFormatTypes.markdown,
                         entities=mentions,
                     )
-                )
-                if response is not None:
-                    result.thread_id = response.id
+
+                    responses = await self.adapter.send_activities(context, [activity])
+                    response = responses[0] if responses else None
+
+                    if response is not None:
+                        result.thread_id = response.id
+                except Exception as ae:
+                    LOGGER.exception(ae)
 
             await self.adapter.continue_conversation(
-                bot_app_id=self.teams_app_id,
-                reference=self._create_conversation_reference(),
+                agent_app_id=self.teams_app_id,
+                continuation_activity=self._create_continuation_activity(),
                 callback=start_thread_callback,
             )
 
@@ -184,8 +207,8 @@ class TeamsClient:
     @staticmethod
     def _get_conversation_operations(context: TurnContext) -> ConversationsOperations:
         # Hack to get the connector client and reply to an existing activity
-        connector_client = context.turn_state[BotAdapter.BOT_CONNECTOR_CLIENT_KEY]
-        return connector_client.conversations  # pyright: ignore
+        connector_client = context.turn_state["ConnectorClient"]
+        return connector_client.conversations  # type: ignore
 
     async def update_thread(
         self, thread_id: str, content: str, member_name: str | None = None
@@ -206,19 +229,13 @@ class TeamsClient:
             result = TeamsMessage(thread_id=thread_id, content=content, message_id="")
 
             async def update_thread_callback(context: TurnContext):
-                mention_member = None
-                if member_name is not None:
-                    members = await TeamsInfo.get_team_members(context, self.team_id)
-                    for member in members:
-                        if member.name == member_name:
-                            mention_member = member
+                mention_member = await self._get_mention_member(context, member_name)
 
                 mentions = []
                 if mention_member is not None:
                     result.content = f"<at>{mention_member.name}</at> {content}"
                     mention = Mention(
                         text=f"<at>{mention_member.name}</at>",
-                        type="mention",
                         mentioned=ChannelAccount(
                             id=mention_member.id, name=mention_member.name
                         ),
@@ -228,9 +245,7 @@ class TeamsClient:
                 reply = Activity(
                     type=ActivityTypes.message,
                     text=result.content,
-                    from_property=TeamsChannelAccount(
-                        id=self.teams_app_id, name="MCP Bot"
-                    ),
+                    from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
@@ -245,15 +260,15 @@ class TeamsClient:
                     f"{context.activity.conversation.id};messageid={thread_id}"  # pyright: ignore
                 )
                 response = await conversations.send_to_conversation(
-                    conversation_id=conversation_id, activity=reply
+                    conversation_id=conversation_id, body=reply
                 )
 
                 if response is not None:
                     result.message_id = response.id  # pyright: ignore
 
             await self.adapter.continue_conversation(
-                bot_app_id=self.teams_app_id,
-                reference=self._create_conversation_reference(),
+                agent_app_id=self.teams_app_id,
+                continuation_activity=self._create_continuation_activity(),
                 callback=update_thread_callback,
             )
 
@@ -276,8 +291,8 @@ class TeamsClient:
                 result.email = member.email
 
             await self.adapter.continue_conversation(
-                bot_app_id=self.teams_app_id,
-                reference=self._create_conversation_reference(),
+                agent_app_id=self.teams_app_id,
+                continuation_activity=self._create_continuation_activity(),
                 callback=get_member_by_id_callback,
             )
             return result
@@ -421,13 +436,19 @@ class TeamsClient:
             result = []
 
             async def list_members_callback(context: TurnContext):
-                members = await TeamsInfo.get_team_members(context, self.team_id)
-                for member in members:
-                    result.append(TeamsMember(name=member.name, email=member.email))
+                continuation_token = ""
+                try:
+                    members = await TeamsInfo.get_paged_team_members(
+                        context, self.teams_channel_id, 10, continuation_token
+                    )
+                    for member in members.members:
+                        result.append(TeamsMember(name=member.name, email=member.email))
+                except Exception as e:
+                    LOGGER.error(f"Error getting members: {str(e)}")
 
             await self.adapter.continue_conversation(
-                bot_app_id=self.teams_app_id,
-                reference=self._create_conversation_reference(),
+                agent_app_id=self.teams_app_id,
+                continuation_activity=self._create_continuation_activity(),
                 callback=list_members_callback,
             )
             return result
@@ -440,3 +461,4 @@ class TeamsClient:
         for member in members:
             if member.name == name:
                 return member
+        return None

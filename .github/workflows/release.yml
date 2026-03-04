@@ -31,7 +31,8 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.10
 
       - name: Retrieve version
         shell: bash
