@@ -4,6 +4,8 @@
 ![GitHub License](https://img.shields.io/github/license/InditexTech/mcp-teams-server)
 ![GitHub Release](https://img.shields.io/github/v/release/InditexTech/mcp-teams-server)
 [![Scorecard](https://api.scorecard.dev/projects/github.com/InditexTech/mcp-teams-server/badge)](https://scorecard.dev/viewer/?uri=github.com/InditexTech/mcp-teams-server)
+
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/InditexTech/mcp-teams-server)](https://archestra.ai/mcp-catalog/inditextech__mcp-teams-server)
 <!-- [![Best Practices](https://www.bestpractices.dev/projects/10400/badge)](https://www.bestpractices.dev/projects/10400) -->
 
 
