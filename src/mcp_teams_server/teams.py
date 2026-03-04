@@ -11,6 +11,7 @@ from microsoft_agents.activity import (
 )
 from microsoft_agents.activity.activity_types import ActivityTypes
 from microsoft_agents.activity.text_format_types import TextFormatTypes
+from microsoft_agents.activity.teams import TeamsChannelAccount
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from microsoft_agents.hosting.core import TurnContext
 from microsoft_agents.hosting.core.connector.client.connector_client import (
@@ -32,6 +33,7 @@ from pydantic import BaseModel, Field
 
 LOGGER = logging.getLogger(__name__)
 
+MCP_BOT_NAME = "MCP Bot"
 
 class TeamsThread(BaseModel):
     thread_id: str = Field(
@@ -97,7 +99,7 @@ class TeamsClient:
         return Activity(
             type=ActivityTypes.conversation_update,
             service_url=service_url,
-            from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"), #type: ignore
+            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME), #type: ignore
             channel_id="msteams", #type: ignore
             conversation=ConversationAccount(
                 id=self.teams_channel_id,
@@ -119,6 +121,21 @@ class TeamsClient:
                 callback=context_callback,
             )
 
+    async def _get_mention_member(self, context: TurnContext, member_name: str) -> TeamsChannelAccount:
+        mention_member = None
+        if member_name is not None:
+            continuation_token = ""
+            try:
+                members = await TeamsInfo.get_paged_team_members(
+                    context, self.teams_channel_id, 10, continuation_token
+                )
+                for member in members.members:
+                    if member.name == member_name:
+                        mention_member = member
+            except Exception as e:
+                LOGGER.exception(e)
+        return mention_member
+
     async def start_thread(
         self, title: str, content: str, member_name: str | None = None
     ) -> TeamsThread:
@@ -138,18 +155,7 @@ class TeamsClient:
             result = TeamsThread(title=title, content=content, thread_id="")
 
             async def start_thread_callback(context: TurnContext):
-                mention_member = None
-                if member_name is not None:
-                    continuation_token = ""
-                    try:
-                        members = await TeamsInfo.get_paged_team_members(
-                            context, self.teams_channel_id, 10, continuation_token
-                        )
-                        for member in members.members:
-                            if member.name == member_name:
-                                mention_member = member
-                    except Exception as e:
-                        LOGGER.exception(e)
+                mention_member = await self._get_mention_member(context, member_name)
 
                 mentions = []
                 if mention_member is not None:
@@ -167,7 +173,7 @@ class TeamsClient:
                 try:
                     activity = Activity(
                         type=ActivityTypes.message,
-                        from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"),  # type: ignore
+                        from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
                         channel_id="msteams", # type: ignore
                         conversation=context.activity.conversation,
                         topic_name=title,
@@ -220,18 +226,7 @@ class TeamsClient:
             result = TeamsMessage(thread_id=thread_id, content=content, message_id="")
 
             async def update_thread_callback(context: TurnContext):
-                mention_member = None
-                if member_name is not None:
-                    continuation_token = ""
-                    try:
-                        members = await TeamsInfo.get_paged_team_members(
-                            context, self.teams_channel_id, 10, continuation_token
-                        )
-                        for member in members.members:
-                            if member.name == member_name:
-                                mention_member = member
-                    except Exception as e:
-                        LOGGER.error(f"Error getting member name {member_name}: {e}")
+                mention_member = await self._get_mention_member(context, member_name)
 
                 mentions = []
                 if mention_member is not None:
@@ -247,7 +242,7 @@ class TeamsClient:
                 reply = Activity(
                     type=ActivityTypes.message,
                     text=result.content,
-                    from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"), # type: ignore
+                    from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME), # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
