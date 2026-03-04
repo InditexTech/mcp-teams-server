@@ -10,8 +10,8 @@ from microsoft_agents.activity import (
     Mention,
 )
 from microsoft_agents.activity.activity_types import ActivityTypes
-from microsoft_agents.activity.text_format_types import TextFormatTypes
 from microsoft_agents.activity.teams import TeamsChannelAccount
+from microsoft_agents.activity.text_format_types import TextFormatTypes
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from microsoft_agents.hosting.core import TurnContext
 from microsoft_agents.hosting.core.connector.client.connector_client import (
@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field
 LOGGER = logging.getLogger(__name__)
 
 MCP_BOT_NAME = "MCP Bot"
+
 
 class TeamsThread(BaseModel):
     thread_id: str = Field(
@@ -99,8 +100,8 @@ class TeamsClient:
         return Activity(
             type=ActivityTypes.conversation_update,
             service_url=service_url,
-            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME), #type: ignore
-            channel_id="msteams", #type: ignore
+            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
+            channel_id="msteams",  # type: ignore
             conversation=ConversationAccount(
                 id=self.teams_channel_id,
                 is_group=True,
@@ -121,7 +122,9 @@ class TeamsClient:
                 callback=context_callback,
             )
 
-    async def _get_mention_member(self, context: TurnContext, member_name: str) -> TeamsChannelAccount:
+    async def _get_mention_member(
+        self, context: TurnContext, member_name: str | None
+    ) -> TeamsChannelAccount | None:
         mention_member = None
         if member_name is not None:
             continuation_token = ""
@@ -173,13 +176,13 @@ class TeamsClient:
                 try:
                     activity = Activity(
                         type=ActivityTypes.message,
-                        from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
-                        channel_id="msteams", # type: ignore
+                        from_property=ChannelAccount( id=self.teams_app_id, name=MCP_BOT_NAME), # type: ignore
+                        channel_id="msteams",  # type: ignore
                         conversation=context.activity.conversation,
                         topic_name=title,
                         text=result.content,
                         text_format=TextFormatTypes.markdown,
-                        entities=mentions
+                        entities=mentions,
                     )
 
                     responses = await self.adapter.send_activities(context, [activity])
@@ -242,7 +245,7 @@ class TeamsClient:
                 reply = Activity(
                     type=ActivityTypes.message,
                     text=result.content,
-                    from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME), # type: ignore
+                    from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
