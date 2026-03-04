@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 
+
 class BotConfiguration(dict):
     def __init__(self):
         super().__init__()

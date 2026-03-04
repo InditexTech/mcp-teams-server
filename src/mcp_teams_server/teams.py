@@ -97,8 +97,8 @@ class TeamsClient:
         return Activity(
             type=ActivityTypes.conversation_update,
             service_url=service_url,
-            channel_id=self.teams_channel_id,
-            from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"),
+            from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"), #type: ignore
+            channel_id="msteams", #type: ignore
             conversation=ConversationAccount(
                 id=self.teams_channel_id,
                 is_group=True,
@@ -149,7 +149,7 @@ class TeamsClient:
                             if member.name == member_name:
                                 mention_member = member
                     except Exception as e:
-                        LOGGER.error(e)
+                        LOGGER.exception(e)
 
                 mentions = []
                 if mention_member is not None:
@@ -158,24 +158,31 @@ class TeamsClient:
                     )
                     mention = Mention(
                         text=f"<at>{mention_member.name}</at>",
-                        type="mention",
                         mentioned=ChannelAccount(
                             id=mention_member.id, name=mention_member.name
                         ),
                     )
                     mentions.append(mention)
 
-                response = await context.send_activity(
-                    activity_or_text=Activity(
+                try:
+                    activity = Activity(
                         type=ActivityTypes.message,
+                        from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"),  # type: ignore
+                        channel_id="msteams", # type: ignore
+                        conversation=context.activity.conversation,
                         topic_name=title,
                         text=result.content,
                         text_format=TextFormatTypes.markdown,
-                        entities=mentions,
+                        entities=mentions
                     )
-                )
-                if response is not None:
-                    result.thread_id = response.id
+
+                    responses = await self.adapter.send_activities(context, [activity])
+                    response = responses[0] if responses else None
+
+                    if response is not None:
+                        result.thread_id = response.id
+                except Exception as ae:
+                    LOGGER.exception(ae)
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
@@ -192,7 +199,7 @@ class TeamsClient:
     def _get_conversation_operations(context: TurnContext) -> ConversationsOperations:
         # Hack to get the connector client and reply to an existing activity
         connector_client = context.turn_state["ConnectorClient"]
-        return connector_client.conversations  # pyright: ignore
+        return connector_client.conversations  # type: ignore
 
     async def update_thread(
         self, thread_id: str, content: str, member_name: str | None = None
@@ -231,7 +238,6 @@ class TeamsClient:
                     result.content = f"<at>{mention_member.name}</at> {content}"
                     mention = Mention(
                         text=f"<at>{mention_member.name}</at>",
-                        type="mention",
                         mentioned=ChannelAccount(
                             id=mention_member.id, name=mention_member.name
                         ),
@@ -241,7 +247,7 @@ class TeamsClient:
                 reply = Activity(
                     type=ActivityTypes.message,
                     text=result.content,
-                    from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"),
+                    from_property=ChannelAccount(id=self.teams_app_id, name="MCP Bot"), # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
