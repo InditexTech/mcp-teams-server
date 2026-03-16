@@ -49,7 +49,7 @@ class TeamsMessage(BaseModel):
         description="Thread ID as a string in the format '1743086901347'"
     )
     message_id: str = Field(description="Message ID")
-    content: str = Field(description="Message content")
+    content: str | None = Field(description="Message content")
 
 
 class TeamsMember(BaseModel):

@@ -71,42 +71,62 @@ async def test_start_thread(setup_teams_client, user_name):
         f"test_start_thread in team: {setup_teams_client.team_id} "
         f"and channel {setup_teams_client.teams_channel_id}"
     )
-    result = await setup_teams_client.start_thread(
-        "First thread", "First thread content with mention", user_name
-    )
-    print(f"Result {result}\n")
-    assert result is not None
+    try:
+        result = await setup_teams_client.start_thread(
+            "First thread", "First thread content with mention", user_name
+        )
+        print(f"Result {result}\n")
+        assert result is not None
+    except Exception as ex:
+        LOGGER.error(ex)
+        pytest.fail(str(ex))
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_read_threads(setup_teams_client):
-    result = await setup_teams_client.read_threads(50)
-    print(f"Result {result}\n")
-    assert result is not None
+    try:
+        result = await setup_teams_client.read_threads(50)
+        print(f"Result {result}\n")
+        assert result is not None
+    except Exception as ex:
+        LOGGER.error(ex)
+        pytest.fail(str(ex))
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_update_thread(setup_teams_client, thread_id, user_name):
-    result = await setup_teams_client.update_thread(
-        thread_id, "Thread updated content with mention", user_name
-    )
-    print(f"Result {result}\n")
-    assert result is not None
+    try:
+        result = await setup_teams_client.update_thread(
+            thread_id, "Thread updated content with mention", user_name
+        )
+        print(f"Result {result}\n")
+        assert result is not None
+    except Exception as ex:
+        LOGGER.error(ex)
+        pytest.fail(str(ex))
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_read_thread_replies(setup_teams_client, thread_id):
-    result = await setup_teams_client.read_thread_replies(thread_id)
-    print(f"Result {result}\n")
-    assert result is not None
+    try:
+        result = await setup_teams_client.read_thread_replies(thread_id)
+        print(f"Result {result}\n")
+        assert result is not None
+    except Exception as ex:
+        LOGGER.error(ex)
+        pytest.fail(str(ex))
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_list_members(setup_teams_client):
-    result = await setup_teams_client.list_members()
-    print(f"Result {result}\n")
-    assert result is not None
+    try:
+        result = await setup_teams_client.list_members()
+        print(f"Result {result}\n")
+        assert result is not None
+    except Exception as ex:
+        LOGGER.error(ex)
+        pytest.fail(str(ex))
