@@ -1,5 +1,4 @@
 name: Release
-permissions: read-all
 
 on:
   pull_request:

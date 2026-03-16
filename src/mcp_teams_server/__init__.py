@@ -217,8 +217,11 @@ def main() -> None:
         f'Starting MCP Teams Server "{__version__}" with transport "{args.transport}"'
     )
     _check_required_environment()
-    mcp.run(transport=args.transport)
 
+    try:
+        mcp.run(transport=args.transport)
+    except Exception as err:
+        LOGGER.exception(err)
 
 if __name__ == "__main__":
     main()
