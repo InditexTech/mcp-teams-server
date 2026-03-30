@@ -13,6 +13,10 @@ An MCP ([Model Context Protocol](https://modelcontextprotocol.io/introduction)) 
 [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software/) integration, providing capabilities to 
 read messages, create messages, reply to messages, mention members.
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/inditextech-mcp-teams-server).
+
 ## Features
 
 https://github.com/user-attachments/assets/548a9768-1119-4a2d-bd5c-6b41069fc522
