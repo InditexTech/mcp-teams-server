@@ -42,7 +42,7 @@ dev = [
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=6.2.1",
     "reuse>=5.0.2",
-    "ruff>=0.15.5",
+    "ruff>=0.15.10",
 ]
 
 [tool.uv]
