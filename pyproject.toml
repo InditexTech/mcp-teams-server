@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.8"
+version = "1.0.9"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
@@ -36,13 +36,13 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "mock>=5.2.0",
-    "pyproject-parser[cli]>=0.13.0",
+    "pyproject-parser[cli]>=0.14.0",
     "pyright>=1.1.406",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
-    "pytest-cov>=6.2.1",
+    "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
-    "ruff>=0.15.5",
+    "ruff>=0.15.10",
 ]
 
 [tool.uv]
