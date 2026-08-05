@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/glama%2FInditexTech%2Fmcp-teams-server.svg)](https://mcptoplist.com/server/glama%2FInditexTech%2Fmcp-teams-server)
+
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=InditexTech_mcp-teams-server&metric=bugs)](https://sonarcloud.io/summary/new_code?id=InditexTech_mcp-teams-server)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=InditexTech_mcp-teams-server&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=InditexTech_mcp-teams-server)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=InditexTech_mcp-teams-server&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=InditexTech_mcp-teams-server)
