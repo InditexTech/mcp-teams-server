@@ -19,7 +19,7 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "mcp[cli]==1.28.1",
     "msgraph-sdk>=1.58.0",
-    "setuptools>=82.0.1",
+    "setuptools>=83.0.0",
 ]
 
 [project.urls]
