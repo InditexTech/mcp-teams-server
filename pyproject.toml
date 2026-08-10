@@ -18,7 +18,7 @@ dependencies = [
     "microsoft-agents-hosting-aiohttp>=0.8.0",
     "python-dotenv>=1.2.1",
     "mcp[cli]==1.27.2",
-    "msgraph-sdk>=1.58.0",
+    "msgraph-sdk>=1.61.0",
     "setuptools>=82.0.1",
 ]
 
