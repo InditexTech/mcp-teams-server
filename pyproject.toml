@@ -9,7 +9,7 @@ maintainers = [
     { name = "Mariano Alonso Ortiz", email = "marianoao@inditex.com" },
 ]
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "microsoft-agents-authentication-msal>=0.8.0",
     "microsoft-agents-activity>=0.8.0",
