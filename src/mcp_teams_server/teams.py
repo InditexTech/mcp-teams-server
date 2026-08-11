@@ -244,7 +244,7 @@ class TeamsClient:
 
                 reply = Activity(
                     type=ActivityTypes.message,
-                    text=result.content,
+                    text=result.content if result.content is not None else '',
                     from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,

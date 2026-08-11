@@ -25,7 +25,6 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.integration
 @pytest.fixture()
 def setup_teams_client() -> TeamsClient:
     # Cloud adapter
