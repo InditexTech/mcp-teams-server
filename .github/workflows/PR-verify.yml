@@ -23,7 +23,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.10
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Ruff format check
         run: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.10
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Pyright type checking
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.10
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
         run: |
@@ -117,4 +117,3 @@ jobs:
 
       - name: REUSE Compliance Check
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
-

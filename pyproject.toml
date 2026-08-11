@@ -9,7 +9,7 @@ maintainers = [
     { name = "Mariano Alonso Ortiz", email = "marianoao@inditex.com" },
 ]
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "microsoft-agents-authentication-msal>=0.8.0",
     "microsoft-agents-activity>=0.8.0",
@@ -38,7 +38,7 @@ dev = [
     "mock>=5.2.0",
     "pyproject-parser[cli]>=0.14.0",
     "pyright>=1.1.411",
-    "pytest>=8.4.2",
+    "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "reuse>=5.0.2",

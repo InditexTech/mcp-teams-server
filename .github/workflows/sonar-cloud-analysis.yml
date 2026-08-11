@@ -37,7 +37,7 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
         run: uv run pytest --cov-report term --cov-report xml:coverage-unit.xml --cov=.
