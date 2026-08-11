@@ -17,9 +17,9 @@ dependencies = [
     "microsoft-agents-hosting-teams>=0.8.0",
     "microsoft-agents-hosting-aiohttp>=0.8.0",
     "python-dotenv>=1.2.1",
-    "mcp[cli]==1.27.2",
-    "msgraph-sdk>=1.58.0",
-    "setuptools>=82.0.1",
+    "mcp[cli]==1.28.1",
+    "msgraph-sdk>=1.61.0",
+    "setuptools>=83.0.0",
 ]
 
 [project.urls]
@@ -37,12 +37,12 @@ build-backend = "hatchling.build"
 dev = [
     "mock>=5.2.0",
     "pyproject-parser[cli]>=0.14.0",
-    "pyright>=1.1.410",
+    "pyright>=1.1.411",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
-    "ruff>=0.15.15",
+    "ruff>=0.16.2",
 ]
 
 [tool.uv]
