@@ -1,0 +1,19 @@
+uv.lock
+  s_6f3da57054011f::t_47ff7019e4b147 1039
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "98b688e010e51021330e3d52a0fac7130d41980e",
+  "prompts": {},
+  "sessions": {
+    "s_6f3da57054011f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fcbaa884affegaW5xTuBYsp3ZB",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
