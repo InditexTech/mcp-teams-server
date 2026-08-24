@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.10"
+version = "1.0.11"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
