@@ -47,7 +47,6 @@ jobs:
         env:
           TEAMS_APP_ID: ${{ vars.TEAMS_APP_ID }}
           TEAMS_APP_PASSWORD: ${{ secrets.TEAMS_APP_PASSWORD }}
-          TEAMS_APP_TYPE: ${{ vars.TEAMS_APP_TYPE }}
           TEAMS_APP_TENANT_ID: ${{ vars.TEAMS_APP_TENANT_ID }}
           TEAM_ID: ${{ vars.TEAM_ID }}
           TEAMS_CHANNEL_ID: ${{ vars.TEAMS_CHANNEL_ID }}

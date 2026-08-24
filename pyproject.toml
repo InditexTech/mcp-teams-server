@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.10"
+version = "1.0.11"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
@@ -42,7 +42,7 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
-    "ruff>=0.16.2",
+    "ruff>=0.16.4",
 ]
 
 [tool.uv]
@@ -53,7 +53,7 @@ mcp-teams-server = ["setuptools"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]

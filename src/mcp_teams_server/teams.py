@@ -389,7 +389,7 @@ class TeamsClient:
                 )
 
             result = PagedTeamsMessages(
-                cursor=cursor,
+                cursor=replies.odata_next_link,  # pyright: ignore
                 limit=limit,
                 total=replies.odata_count,  # pyright: ignore
                 items=[],
