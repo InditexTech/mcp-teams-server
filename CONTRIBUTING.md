@@ -47,7 +47,7 @@ Make sure that you have:
 - Read the rest of the [`CONTRIBUTING.md`](CONTRIBUTING.md) sections.
 - Meet the [prerequisites](#prerequisites).
 - [uv](https://github.com/astral-sh/uv) installed
-- [python](https://www.python.org/) 3.10 or later installed
+- [python](https://www.python.org/) 3.12 or later installed
 - Set up integration with Microsoft Teams by your own means
 - Run integration tests to verify Microsoft Teams integration
 
@@ -88,4 +88,3 @@ is not ready for this use (although the internal REST API allows it, and it work
 Azure Bot Builder allows to perform any write operation, but reading messages or previous threads is not possible 
 without a special "migration" permission. Because of that, we have preferred to use Microsoft Graph to read messages.
 Microsoft Application Entra ID must have been granted permissions to read messages in a channel.
-

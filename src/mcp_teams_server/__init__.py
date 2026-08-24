@@ -47,7 +47,6 @@ LOGGER = logging.getLogger(__name__)
 REQUIRED_ENV_VARS = [
     "TEAMS_APP_ID",
     "TEAMS_APP_PASSWORD",
-    "TEAMS_APP_TYPE",
     "TEAMS_APP_TENANT_ID",
     "TEAM_ID",
     "TEAMS_CHANNEL_ID",
@@ -204,7 +203,6 @@ def main() -> None:
     parser.add_argument(
         "-t",
         "--transport",
-        nargs=1,
         type=str,
         help="MCP Server Transport: stdio or sse",
         default=default_transport,
