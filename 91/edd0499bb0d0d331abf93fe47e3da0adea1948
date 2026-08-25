@@ -1,0 +1,19 @@
+tests/test_main.py
+  s_6074f87ff69da1::t_1aa52eff939cf6 10,57-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "91edd0499bb0d0d331abf93fe47e3da0adea1948",
+  "prompts": {},
+  "sessions": {
+    "s_6074f87ff69da1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fc82cb22fffe6MaummfHXb7zcq",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
