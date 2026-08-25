@@ -23,7 +23,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --no-build --frozen --all-extras --dev --python 3.12
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Ruff check
         run: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --no-build --frozen --all-extras --dev --python 3.12
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Pyright type checking
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --no-build --frozen --all-extras --dev --python 3.12
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
         run: |
