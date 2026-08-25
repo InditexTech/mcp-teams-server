@@ -39,7 +39,7 @@ The bot account is used only as a consumer for the Azure Bot REST api and you wi
 ![Azure Bot Channels](./images/azure_bot_channels.png)
 
 You will not need to deploy a Bot application in Azure or the Internet because this MCP server uses 
-Azure Bot Framework as a client to Bot Framework api.
+Microsoft Agents SDK as a client to microsoft apis.
 
 ### Microsoft Teams Application publishing
 

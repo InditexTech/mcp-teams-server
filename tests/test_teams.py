@@ -5,16 +5,19 @@ import os
 import sys
 from types import SimpleNamespace
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 from azure.identity.aio import ClientSecretCredential
 from dotenv import load_dotenv
+from microsoft_agents.activity import ConversationAccount
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
+from microsoft_agents.hosting.core import TurnContext
 from msgraph.graph_service_client import GraphServiceClient
 
 from mcp_teams_server.config import BotConfiguration
-from mcp_teams_server.teams import TeamsClient
+from mcp_teams_server.teams import DEFAULT_MEMBER_PAGE_SIZE, TeamsClient
 
 load_dotenv()
 
@@ -41,37 +44,124 @@ class FakeChatMessageRequestBuilder:
 
 
 class FakeMessagesRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
+        self.url = None
 
     def by_chat_message_id(self, chat_message_id):
         return FakeChatMessageRequestBuilder(self.replies_builder)
 
+    def with_url(self, url):
+        self.url = url
+        return self
+
+    async def get(self, request_configuration=None):
+        return self.response
+
 
 class FakeChannelRequestBuilder:
-    def __init__(self, replies_builder):
-        self.messages = FakeMessagesRequestBuilder(replies_builder)
+    def __init__(self, replies_builder, response=None):
+        self.messages = FakeMessagesRequestBuilder(replies_builder, response)
 
 
 class FakeChannelsRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
 
     def by_channel_id(self, channel_id):
-        return FakeChannelRequestBuilder(self.replies_builder)
+        return FakeChannelRequestBuilder(self.replies_builder, self.response)
 
 
 class FakeTeamRequestBuilder:
-    def __init__(self, replies_builder):
-        self.channels = FakeChannelsRequestBuilder(replies_builder)
+    def __init__(self, replies_builder, response=None):
+        self.channels = FakeChannelsRequestBuilder(replies_builder, response)
 
 
 class FakeTeamsRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
 
     def by_team_id(self, team_id):
-        return FakeTeamRequestBuilder(self.replies_builder)
+        return FakeTeamRequestBuilder(self.replies_builder, self.response)
+
+
+class FakeAdapter:
+    on_turn_error = None
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(SimpleNamespace(activity=SimpleNamespace(service_url="url")))
+
+
+class FakeStartThreadAdapter:
+    on_turn_error = None
+
+    def __init__(self, responses=None, exception=None):
+        self.responses = responses
+        self.exception = exception
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(
+                SimpleNamespace(
+                    activity=SimpleNamespace(
+                        service_url="url",
+                        conversation=ConversationAccount(id="conversation-id"),
+                    )
+                )
+            )
+
+    async def send_activities(self, context, activities):
+        if self.exception is not None:
+            raise self.exception
+        return self.responses
+
+
+class FakeUpdateThreadAdapter:
+    on_turn_error = None
+
+    def __init__(self, response=None):
+        self.response = response
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(
+                SimpleNamespace(
+                    activity=SimpleNamespace(
+                        service_url="url",
+                        conversation=ConversationAccount(id="conversation-id"),
+                    ),
+                    turn_state={
+                        "ConnectorClient": SimpleNamespace(
+                            conversations=SimpleNamespace(
+                                send_to_conversation=self.send_to_conversation
+                            )
+                        )
+                    },
+                )
+            )
+
+    async def send_to_conversation(self, conversation_id, body):
+        return self.response
+
+
+def create_test_client(adapter) -> TeamsClient:
+    return TeamsClient(
+        cast(CloudAdapter, adapter),
+        cast(GraphServiceClient, SimpleNamespace()),
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
 
 
 @pytest.fixture()
@@ -130,6 +220,159 @@ async def test_read_thread_replies_returns_next_page_cursor():
     assert result.limit == 25
     assert result.total == 1
     assert result.items[0].message_id == "reply-id"
+
+
+@pytest.mark.asyncio
+async def test_read_threads_defaults_total_and_missing_body_content():
+    graph_response = SimpleNamespace(
+        odata_next_link=None,
+        value=[SimpleNamespace(id="message-id")],
+    )
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(None, graph_response)),
+    )
+    client = TeamsClient(
+        cast(CloudAdapter, SimpleNamespace()),
+        graph_client,
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    result = await client.read_threads(limit=10)
+
+    assert result.total == 1
+    assert result.items[0].message_id == "message-id"
+    assert result.items[0].thread_id == "message-id"
+    assert result.items[0].content is None
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_defaults_total_and_missing_fields():
+    graph_response = SimpleNamespace(
+        odata_next_link=None,
+        value=[SimpleNamespace(id="reply-id")],
+    )
+    replies_builder = FakeRepliesRequestBuilder(graph_response)
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(replies_builder)),
+    )
+    client = TeamsClient(
+        cast(CloudAdapter, SimpleNamespace()),
+        graph_client,
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    result = await client.read_thread_replies("thread-id", limit=10)
+
+    assert result.total == 1
+    assert result.items[0].message_id == "reply-id"
+    assert result.items[0].thread_id == "thread-id"
+    assert result.items[0].content is None
+
+
+@pytest.mark.asyncio
+async def test_start_thread_raises_when_send_fails():
+    client = create_test_client(
+        FakeStartThreadAdapter(exception=RuntimeError("send failed"))
+    )
+
+    with pytest.raises(RuntimeError, match="send failed"):
+        await client.start_thread("title", "content")
+
+
+@pytest.mark.asyncio
+async def test_start_thread_raises_when_response_is_missing():
+    client = create_test_client(FakeStartThreadAdapter(responses=[]))
+
+    with pytest.raises(RuntimeError, match="thread creation response"):
+        await client.start_thread("title", "content")
+
+
+@pytest.mark.asyncio
+async def test_update_thread_raises_when_response_is_missing():
+    client = create_test_client(FakeUpdateThreadAdapter(response=None))
+
+    with pytest.raises(RuntimeError, match="thread update response"):
+        await client.update_thread("thread-id", "content")
+
+
+@pytest.mark.asyncio
+async def test_list_members_reads_all_pages_with_configurable_page_size():
+    calls = []
+    pages = [
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(name="Ada Lovelace", email="ada@example.com"),
+            ],
+            continuation_token="next-page",
+        ),
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(name="Grace Hopper", email="grace@example.com"),
+            ],
+            continuation_token=None,
+        ),
+    ]
+
+    async def get_paged_team_members(context, teams_channel_id, page_size, token):
+        calls.append((teams_channel_id, page_size, token))
+        return pages.pop(0)
+
+    client = create_test_client(FakeAdapter())
+
+    with patch(
+        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
+        side_effect=get_paged_team_members,
+    ):
+        result = await client.list_members(page_size=25)
+
+    assert calls == [("channel-id", 25, ""), ("channel-id", 25, "next-page")]
+    assert [member.name for member in result] == ["Ada Lovelace", "Grace Hopper"]
+
+
+@pytest.mark.asyncio
+async def test_get_mention_member_searches_all_pages():
+    calls = []
+    pages = [
+        SimpleNamespace(
+            members=[SimpleNamespace(name="Ada Lovelace", email="ada@example.com")],
+            continuation_token="next-page",
+        ),
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(
+                    id="member-id", name="Grace Hopper", email="grace@example.com"
+                ),
+            ],
+            continuation_token=None,
+        ),
+    ]
+
+    async def get_paged_team_members(context, teams_channel_id, page_size, token):
+        calls.append((teams_channel_id, page_size, token))
+        return pages.pop(0)
+
+    client = create_test_client(FakeAdapter())
+
+    with patch(
+        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
+        side_effect=get_paged_team_members,
+    ):
+        result = await client._get_mention_member(
+            cast(TurnContext, SimpleNamespace()), "Grace Hopper"
+        )
+
+    assert calls == [
+        ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, ""),
+        ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, "next-page"),
+    ]
+    assert result is not None
+    assert result.name == "Grace Hopper"
 
 
 @pytest.fixture()
