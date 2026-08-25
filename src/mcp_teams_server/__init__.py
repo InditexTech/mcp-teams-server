@@ -10,7 +10,8 @@ from importlib import metadata
 
 from azure.identity.aio import ClientSecretCredential
 from dotenv import load_dotenv
-from mcp.server.fastmcp import Context, FastMCP
+from mcp.server import MCPServer
+from mcp.server.mcpserver import Context
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from msgraph.graph_service_client import GraphServiceClient
@@ -62,7 +63,7 @@ class AppContext:
 
 
 @asynccontextmanager
-async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
+async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
     """Manage application lifecycle with type-safe context"""
 
     # Bot adapter construction
@@ -90,22 +91,14 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         await credentials.close()
 
 
-mcp = FastMCP(
+mcp = MCPServer(
     "mcp-teams-server",
+    version=__version__,
     lifespan=app_lifespan,
-    dependencies=[
-        "aiohttp",
-        "asyncio",
-        "botbuilder-core",
-        "botbuilder-integration-aiohttp",
-        "dotenv",
-        "msgraph-sdk",
-        "multidict",
-    ],
 )
 
 
-def _get_teams_client(ctx: Context) -> TeamsClient:
+def _get_teams_client(ctx: Context[AppContext]) -> TeamsClient:
     return ctx.request_context.lifespan_context.client
 
 
@@ -113,7 +106,7 @@ def _get_teams_client(ctx: Context) -> TeamsClient:
     name="start_thread", description="Start a new thread with a given title and content"
 )
 async def start_thread(
-    ctx: Context,
+    ctx: Context[AppContext],
     title: str = Field(description="The thread title", min_length=1),
     content: str = Field(description="The thread content", min_length=1),
     member_name: str | None = Field(
@@ -131,7 +124,7 @@ async def start_thread(
     name="update_thread", description="Update an existing thread with new content"
 )
 async def update_thread(
-    ctx: Context,
+    ctx: Context[AppContext],
     thread_id: str = Field(
         description="The thread ID as a string in the format '1743086901347'",
         min_length=1,
@@ -152,7 +145,7 @@ async def update_thread(
 
 @mcp.tool(name="read_thread", description="Read replies in a thread")
 async def read_thread(
-    ctx: Context,
+    ctx: Context[AppContext],
     thread_id: str = Field(
         description="The thread ID as a string in the format '1743086901347'",
         min_length=1,
@@ -178,7 +171,7 @@ async def read_thread(
 
 @mcp.tool(name="list_threads", description="List threads in channel with pagination")
 async def list_threads(
-    ctx: Context,
+    ctx: Context[AppContext],
     limit: int = Field(
         description="Maximum number of items to retrieve or page size",
         default=MAX_THREAD_PAGE_SIZE,
@@ -198,7 +191,7 @@ async def list_threads(
 
 @mcp.tool(name="get_member_by_name", description="Get a member by its name")
 async def get_member_by_name(
-    ctx: Context, name: str = Field(description="Member name", min_length=1)
+    ctx: Context[AppContext], name: str = Field(description="Member name", min_length=1)
 ):
     await ctx.debug(f"get_member_by_name with name={name}")
     client = _get_teams_client(ctx)
@@ -207,7 +200,7 @@ async def get_member_by_name(
 
 @mcp.tool(name="list_members", description="List all members in the team")
 async def list_members(
-    ctx: Context,
+    ctx: Context[AppContext],
     page_size: int = Field(
         description="Number of members to retrieve per request",
         default=DEFAULT_MEMBER_PAGE_SIZE,
@@ -244,9 +237,9 @@ def main() -> None:
         "-t",
         "--transport",
         type=str,
-        help="MCP Server Transport: stdio or sse",
+        help="MCP Server Transport: stdio, streamable-http, or sse (legacy)",
         default=default_transport,
-        choices=["stdio", "sse"],
+        choices=["stdio", "streamable-http", "sse"],
     )
 
     args = parser.parse_args()

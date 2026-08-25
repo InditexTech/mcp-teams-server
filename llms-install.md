@@ -141,6 +141,8 @@ Read replies in a thread
 
 **Parameters:**
 - `thread_id`: (Required) The thread ID as a string in the format '1743086901347'
+- `limit`: (Optional, default 50) Maximum number of replies to retrieve or page size
+- `cursor`: (Optional) Pagination cursor for the next page of results, returned by previous read_thread tool call.
 
 #### 4. list_threads
 
@@ -161,6 +163,9 @@ Get a member by its name
 
 List all members in the team
 
+**Parameters:**
+- `page_size`: (Optional, default 100) Number of members to retrieve per request
+
 ## Usage Examples
 
 Some ideas for user prompts are:
@@ -180,5 +185,4 @@ Please perform this task... and send results to a new thread in teams. Remember 
 ```
 Please read latest team threads and reply to threads that mention "Your bot name" 
 ```
-
 
