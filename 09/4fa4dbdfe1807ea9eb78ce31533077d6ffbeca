@@ -1,0 +1,20 @@
+.github/workflows/PR-verify.yml
+  h_8fe143308bc629 26,30,49,53,72,76
+.github/workflows/release.yml
+  h_8fe143308bc629 34
+Dockerfile
+  h_8fe143308bc629 16-20
+tests/test_teams.py
+  h_8fe143308bc629 167,378,383,388,400,409,415,422,428,437,443,450,456,463
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "094fa4dbdfe1807ea9eb78ce31533077d6ffbeca",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
