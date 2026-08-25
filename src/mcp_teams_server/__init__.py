@@ -157,10 +157,23 @@ async def read_thread(
         description="The thread ID as a string in the format '1743086901347'",
         min_length=1,
     ),
+    limit: int = Field(
+        description="Maximum number of replies to retrieve or page size",
+        default=MAX_THREAD_PAGE_SIZE,
+        ge=1,
+        le=MAX_THREAD_PAGE_SIZE,
+    ),
+    cursor: str | None = Field(
+        description="Pagination cursor for the next page of results",
+        default=None,
+        min_length=1,
+    ),
 ) -> PagedTeamsMessages:
-    await ctx.debug(f"read_thread with thread_id={thread_id}")
+    await ctx.debug(
+        f"read_thread with thread_id={thread_id}, cursor={cursor} and limit={limit}"
+    )
     client = _get_teams_client(ctx)
-    return await client.read_thread_replies(thread_id, 50)
+    return await client.read_thread_replies(thread_id, limit, cursor)
 
 
 @mcp.tool(name="list_threads", description="List threads in channel with pagination")

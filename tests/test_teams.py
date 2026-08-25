@@ -44,37 +44,48 @@ class FakeChatMessageRequestBuilder:
 
 
 class FakeMessagesRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
+        self.url = None
 
     def by_chat_message_id(self, chat_message_id):
         return FakeChatMessageRequestBuilder(self.replies_builder)
 
+    def with_url(self, url):
+        self.url = url
+        return self
+
+    async def get(self, request_configuration=None):
+        return self.response
+
 
 class FakeChannelRequestBuilder:
-    def __init__(self, replies_builder):
-        self.messages = FakeMessagesRequestBuilder(replies_builder)
+    def __init__(self, replies_builder, response=None):
+        self.messages = FakeMessagesRequestBuilder(replies_builder, response)
 
 
 class FakeChannelsRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
 
     def by_channel_id(self, channel_id):
-        return FakeChannelRequestBuilder(self.replies_builder)
+        return FakeChannelRequestBuilder(self.replies_builder, self.response)
 
 
 class FakeTeamRequestBuilder:
-    def __init__(self, replies_builder):
-        self.channels = FakeChannelsRequestBuilder(replies_builder)
+    def __init__(self, replies_builder, response=None):
+        self.channels = FakeChannelsRequestBuilder(replies_builder, response)
 
 
 class FakeTeamsRequestBuilder:
-    def __init__(self, replies_builder):
+    def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
+        self.response = response
 
     def by_team_id(self, team_id):
-        return FakeTeamRequestBuilder(self.replies_builder)
+        return FakeTeamRequestBuilder(self.replies_builder, self.response)
 
 
 class FakeAdapter:
@@ -209,6 +220,59 @@ async def test_read_thread_replies_returns_next_page_cursor():
     assert result.limit == 25
     assert result.total == 1
     assert result.items[0].message_id == "reply-id"
+
+
+@pytest.mark.asyncio
+async def test_read_threads_defaults_total_and_missing_body_content():
+    graph_response = SimpleNamespace(
+        odata_next_link=None,
+        value=[SimpleNamespace(id="message-id")],
+    )
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(None, graph_response)),
+    )
+    client = TeamsClient(
+        cast(CloudAdapter, SimpleNamespace()),
+        graph_client,
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    result = await client.read_threads(limit=10)
+
+    assert result.total == 1
+    assert result.items[0].message_id == "message-id"
+    assert result.items[0].thread_id == "message-id"
+    assert result.items[0].content is None
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_defaults_total_and_missing_fields():
+    graph_response = SimpleNamespace(
+        odata_next_link=None,
+        value=[SimpleNamespace(id="reply-id")],
+    )
+    replies_builder = FakeRepliesRequestBuilder(graph_response)
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(replies_builder)),
+    )
+    client = TeamsClient(
+        cast(CloudAdapter, SimpleNamespace()),
+        graph_client,
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    result = await client.read_thread_replies("thread-id", limit=10)
+
+    assert result.total == 1
+    assert result.items[0].message_id == "reply-id"
+    assert result.items[0].thread_id == "thread-id"
+    assert result.items[0].content is None
 
 
 @pytest.mark.asyncio

@@ -74,6 +74,9 @@ async def test_tool_schemas_expose_input_validation_constraints():
 
     read_thread_properties = schemas["read_thread"]["properties"]
     assert read_thread_properties["thread_id"]["minLength"] == 1
+    assert read_thread_properties["limit"]["minimum"] == 1
+    assert read_thread_properties["limit"]["maximum"] == MAX_THREAD_PAGE_SIZE
+    assert read_thread_properties["cursor"]["anyOf"][0]["minLength"] == 1
 
     list_threads_properties = schemas["list_threads"]["properties"]
     assert list_threads_properties["limit"]["minimum"] == 1

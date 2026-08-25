@@ -18,10 +18,6 @@ from microsoft_agents.hosting.core.connector.client.connector_client import (
     ConversationsOperations,
 )
 from microsoft_agents.hosting.teams import TeamsInfo
-from msgraph.generated.models.chat_message import ChatMessage
-from msgraph.generated.teams.item.channels.item.messages.item.chat_message_item_request_builder import (
-    ChatMessageItemRequestBuilder,
-)
 from msgraph.generated.teams.item.channels.item.messages.item.replies.replies_request_builder import (
     RepliesRequestBuilder,
 )
@@ -91,7 +87,10 @@ class TeamsClient:
 
     @staticmethod
     async def on_turn_error(context: TurnContext, error: Exception):
-        LOGGER.error(f"Error {str(error)}")
+        LOGGER.error(
+            "Error during turn",
+            exc_info=(type(error), error, error.__traceback__),
+        )
         # await context.send_activity("An error occurred in the bot, please try again later")
 
     def _create_continuation_activity(self) -> Activity:
@@ -209,8 +208,8 @@ class TeamsClient:
             )
 
             return result
-        except Exception as e:
-            LOGGER.error(f"Error creating thread: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error creating thread")
             raise
 
     @staticmethod
@@ -286,8 +285,8 @@ class TeamsClient:
             )
 
             return result
-        except Exception as e:
-            LOGGER.error(f"Error updating thread: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error updating thread")
             raise
 
     async def get_member_by_id(self, member_id: str) -> TeamsMember:
@@ -309,8 +308,8 @@ class TeamsClient:
                 callback=get_member_by_id_callback,
             )
             return result
-        except Exception as e:
-            LOGGER.error(f"Error updating thread: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error getting member by ID")
             raise
 
     async def read_threads(
@@ -345,25 +344,29 @@ class TeamsClient:
                     .messages.get(request_configuration=request)
                 )
 
-            result = PagedTeamsMessages(
-                cursor=response.odata_next_link,  # pyright: ignore
-                limit=limit,
-                total=response.odata_count,  # pyright: ignore
-                items=[],
-            )
-            if response.value is not None:  # pyright: ignore
-                for message in response.value:  # pyright: ignore
-                    result.items.append(
-                        TeamsMessage(
-                            message_id=message.id,  # pyright: ignore
-                            content=message.body.content,  # pyright: ignore
-                            thread_id=message.id,  # pyright: ignore
-                        )
+            items = []
+            for message in getattr(response, "value", None) or []:
+                message_id = getattr(message, "id", None) or ""
+                body = getattr(message, "body", None)
+                items.append(
+                    TeamsMessage(
+                        message_id=message_id,
+                        content=getattr(body, "content", None),
+                        thread_id=message_id,
                     )
+                )
+
+            total = getattr(response, "odata_count", None)
+            result = PagedTeamsMessages(
+                cursor=getattr(response, "odata_next_link", None),
+                limit=limit,
+                total=total if total is not None else len(items),
+                items=items,
+            )
 
             return result
-        except Exception as e:
-            LOGGER.error(f"Error reading thread: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error reading threads")
             raise
 
     async def read_thread_replies(
@@ -401,41 +404,28 @@ class TeamsClient:
                     .replies.get(request_configuration=request)
                 )
 
-            result = PagedTeamsMessages(
-                cursor=replies.odata_next_link,  # pyright: ignore
-                limit=limit,
-                total=replies.odata_count,  # pyright: ignore
-                items=[],
-            )
-
-            if replies is not None and replies.value is not None:
-                for reply in replies.value:
-                    result.items.append(
-                        TeamsMessage(
-                            message_id=reply.id,  # pyright: ignore
-                            content=reply.body.content,  # pyright: ignore
-                            thread_id=reply.reply_to_id,  # pyright: ignore
-                        )
+            items = []
+            for reply in getattr(replies, "value", None) or []:
+                body = getattr(reply, "body", None)
+                items.append(
+                    TeamsMessage(
+                        message_id=getattr(reply, "id", None) or "",
+                        content=getattr(body, "content", None),
+                        thread_id=getattr(reply, "reply_to_id", None) or thread_id,
                     )
+                )
+
+            total = getattr(replies, "odata_count", None)
+            result = PagedTeamsMessages(
+                cursor=getattr(replies, "odata_next_link", None),
+                limit=limit,
+                total=total if total is not None else len(items),
+                items=items,
+            )
 
             return result
-        except Exception as e:
-            LOGGER.error(f"Error reading thread: {str(e)}")
-            raise
-
-    async def read_message(self, message_id: str) -> ChatMessage | None:
-        try:
-            query = ChatMessageItemRequestBuilder.ChatMessageItemRequestBuilderGetQueryParameters()
-            request = RequestConfiguration(query_parameters=query)
-            response = (
-                await self.graph_client.teams.by_team_id(self.team_id)
-                .channels.by_channel_id(self.teams_channel_id)
-                .messages.by_chat_message_id(chat_message_id=message_id)
-                .get(request_configuration=request)
-            )
-            return response
-        except Exception as e:
-            LOGGER.error(f"Error reading thread: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error reading thread replies")
             raise
 
     async def list_members(
@@ -472,8 +462,8 @@ class TeamsClient:
                 callback=list_members_callback,
             )
             return result
-        except Exception as e:
-            LOGGER.error(f"Error listing members: {str(e)}")
+        except Exception:
+            LOGGER.exception("Error listing members")
             raise
 
     async def get_member_by_name(self, name: str) -> TeamsMember | None:
