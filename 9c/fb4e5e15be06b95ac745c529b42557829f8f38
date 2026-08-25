@@ -1,0 +1,26 @@
+CHANGELOG.md
+  h_8fe143308bc629 17-19
+README.md
+  h_8fe143308bc629 72-79,126-131
+llms-install.md
+  h_8fe143308bc629 144-145,166-168
+pyproject.toml
+  h_8fe143308bc629 3,20
+src/mcp_teams_server/__init__.py
+  h_8fe143308bc629 13-14,66,94,96,101,109,127,148,174,194,203,240,242
+tests/test_main.py
+  h_8fe143308bc629 53-64,75
+uv.lock
+  h_8fe143308bc629 5-6,813-825,847-865,867,869,1036,1040,1042-1043,1054,1056,1067,1095,1118-1130,2212-2220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9cfb4e5e15be06b95ac745c529b42557829f8f38",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
