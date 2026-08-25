@@ -1,0 +1,20 @@
+.github/workflows/PR-verify.yml
+  h_8fe143308bc629 98
+.github/workflows/release.yml
+  h_8fe143308bc629 39
+.github/workflows/sonar-cloud-analysis.yml
+  h_8fe143308bc629 40,43,46
+Dockerfile
+  h_8fe143308bc629 16-19,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b8fe9898adbb17e8f061d7b1a112d1576169ca0b",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
