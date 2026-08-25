@@ -10,14 +10,13 @@ from microsoft_agents.activity import (
     Mention,
 )
 from microsoft_agents.activity.activity_types import ActivityTypes
-from microsoft_agents.activity.teams import TeamsChannelAccount
 from microsoft_agents.activity.text_format_types import TextFormatTypes
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from microsoft_agents.hosting.core import TurnContext
 from microsoft_agents.hosting.core.connector.client.connector_client import (
     ConversationsOperations,
 )
-from microsoft_agents.hosting.teams import TeamsInfo
+from microsoft_agents.hosting.core.connector.teams import TeamsConnectorClient
 from msgraph.generated.teams.item.channels.item.messages.item.replies.replies_request_builder import (
     RepliesRequestBuilder,
 )
@@ -50,6 +49,7 @@ class TeamsMessage(BaseModel):
 
 
 class TeamsMember(BaseModel):
+    id: str = Field(default="", description="Member ID used in mentions")
     name: str = Field(
         description="Member name used in mentions and user information cards"
     )
@@ -63,6 +63,15 @@ class PagedTeamsMessages(BaseModel):
     limit: int = Field(description="Page limit, maximum number of items to retrieve")
     total: int = Field(description="Total items available for retrieval")
     items: list[TeamsMessage] = Field(description="List of channel messages or threads")
+
+
+class PagedTeamsMembers(BaseModel):
+    cursor: str | None = Field(
+        description="Cursor to retrieve the next page of members."
+    )
+    limit: int = Field(description="Page limit, maximum number of members to retrieve")
+    total: int = Field(description="Total members available for retrieval")
+    items: list[TeamsMember] = Field(description="List of team members")
 
 
 class TeamsClient:
@@ -124,25 +133,50 @@ class TeamsClient:
 
     async def _get_mention_member(
         self, context: TurnContext, member_name: str | None
-    ) -> TeamsChannelAccount | None:
+    ) -> TeamsMember | None:
         if member_name is None:
             return None
 
-        continuation_token = ""
+        cursor = None
         while True:
-            members = await TeamsInfo.get_paged_team_members(
-                context,
-                self.teams_channel_id,
-                DEFAULT_MEMBER_PAGE_SIZE,
-                continuation_token,
+            members = await self._read_members_page(
+                context, DEFAULT_MEMBER_PAGE_SIZE, cursor
             )
-            for member in members.members:
+            for member in members.items:
                 if member.name == member_name:
                     return member
 
-            continuation_token = members.continuation_token
-            if not continuation_token:
+            cursor = members.cursor
+            if not cursor:
                 return None
+
+    async def _read_members_page(
+        self,
+        context: TurnContext,
+        page_size: int,
+        cursor: str | None = None,
+    ) -> PagedTeamsMembers:
+        teams_client = self._get_teams_connector_client(context)
+        response = await teams_client.get_conversation_paged_member(
+            self.teams_channel_id, page_size, cursor or ""
+        )
+
+        items = []
+        for member in response.members:
+            items.append(
+                TeamsMember(
+                    id=getattr(member, "id", None) or "",
+                    name=getattr(member, "name", None) or "",
+                    email=getattr(member, "email", None) or "",
+                )
+            )
+
+        return PagedTeamsMembers(
+            cursor=response.continuation_token,
+            limit=page_size,
+            total=len(items),
+            items=items,
+        )
 
     async def start_thread(
         self, title: str, content: str, member_name: str | None = None
@@ -217,6 +251,13 @@ class TeamsClient:
         # Hack to get the connector client and reply to an existing activity
         connector_client = context.turn_state["ConnectorClient"]
         return connector_client.conversations  # type: ignore
+
+    @staticmethod
+    def _get_teams_connector_client(context: TurnContext) -> TeamsConnectorClient:
+        connector_client = context.turn_state["ConnectorClient"]
+        if isinstance(connector_client, TeamsConnectorClient):
+            return connector_client
+        return connector_client  # type: ignore
 
     async def update_thread(
         self, thread_id: str, content: str, member_name: str | None = None
@@ -293,14 +334,15 @@ class TeamsClient:
         try:
             await self._initialize()
 
-            result = TeamsMember(name="", email="")
+            result = TeamsMember(id="", name="", email="")
 
             async def get_member_by_id_callback(context: TurnContext):
-                member = await TeamsInfo.get_team_member(
-                    context, self.team_id, member_id
-                )
-                result.name = member.name
-                result.email = member.email
+                member = await self._get_teams_connector_client(
+                    context
+                ).get_conversation_member(self.teams_channel_id, member_id)
+                result.id = member.id
+                result.name = member.name or ""
+                result.email = member.email or ""
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
@@ -444,16 +486,13 @@ class TeamsClient:
             result = []
 
             async def list_members_callback(context: TurnContext):
-                continuation_token = ""
+                cursor = None
                 while True:
-                    members = await TeamsInfo.get_paged_team_members(
-                        context, self.teams_channel_id, page_size, continuation_token
-                    )
-                    for member in members.members:
-                        result.append(TeamsMember(name=member.name, email=member.email))
+                    members = await self._read_members_page(context, page_size, cursor)
+                    result.extend(members.items)
 
-                    continuation_token = members.continuation_token
-                    if not continuation_token:
+                    cursor = members.cursor
+                    if not cursor:
                         return
 
             await self.adapter.continue_conversation(
