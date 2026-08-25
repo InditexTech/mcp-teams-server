@@ -5,16 +5,18 @@ import os
 import sys
 from types import SimpleNamespace
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 from azure.identity.aio import ClientSecretCredential
 from dotenv import load_dotenv
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
+from microsoft_agents.hosting.core import TurnContext
 from msgraph.graph_service_client import GraphServiceClient
 
 from mcp_teams_server.config import BotConfiguration
-from mcp_teams_server.teams import TeamsClient
+from mcp_teams_server.teams import DEFAULT_MEMBER_PAGE_SIZE, TeamsClient
 
 load_dotenv()
 
@@ -74,6 +76,16 @@ class FakeTeamsRequestBuilder:
         return FakeTeamRequestBuilder(self.replies_builder)
 
 
+class FakeAdapter:
+    on_turn_error = None
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(SimpleNamespace(activity=SimpleNamespace(service_url="url")))
+
+
 @pytest.fixture()
 def setup_teams_client() -> TeamsClient:
     # Cloud adapter
@@ -130,6 +142,92 @@ async def test_read_thread_replies_returns_next_page_cursor():
     assert result.limit == 25
     assert result.total == 1
     assert result.items[0].message_id == "reply-id"
+
+
+@pytest.mark.asyncio
+async def test_list_members_reads_all_pages_with_configurable_page_size():
+    calls = []
+    pages = [
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(name="Ada Lovelace", email="ada@example.com"),
+            ],
+            continuation_token="next-page",
+        ),
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(name="Grace Hopper", email="grace@example.com"),
+            ],
+            continuation_token=None,
+        ),
+    ]
+
+    async def get_paged_team_members(context, teams_channel_id, page_size, token):
+        calls.append((teams_channel_id, page_size, token))
+        return pages.pop(0)
+
+    client = TeamsClient(
+        cast(CloudAdapter, FakeAdapter()),
+        cast(GraphServiceClient, SimpleNamespace()),
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    with patch(
+        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
+        side_effect=get_paged_team_members,
+    ):
+        result = await client.list_members(page_size=25)
+
+    assert calls == [("channel-id", 25, ""), ("channel-id", 25, "next-page")]
+    assert [member.name for member in result] == ["Ada Lovelace", "Grace Hopper"]
+
+
+@pytest.mark.asyncio
+async def test_get_mention_member_searches_all_pages():
+    calls = []
+    pages = [
+        SimpleNamespace(
+            members=[SimpleNamespace(name="Ada Lovelace", email="ada@example.com")],
+            continuation_token="next-page",
+        ),
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(
+                    id="member-id", name="Grace Hopper", email="grace@example.com"
+                ),
+            ],
+            continuation_token=None,
+        ),
+    ]
+
+    async def get_paged_team_members(context, teams_channel_id, page_size, token):
+        calls.append((teams_channel_id, page_size, token))
+        return pages.pop(0)
+
+    client = TeamsClient(
+        cast(CloudAdapter, FakeAdapter()),
+        cast(GraphServiceClient, SimpleNamespace()),
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+    with patch(
+        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
+        side_effect=get_paged_team_members,
+    ):
+        result = await client._get_mention_member(
+            cast(TurnContext, SimpleNamespace()), "Grace Hopper"
+        )
+
+    assert calls == [
+        ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, ""),
+        ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, "next-page"),
+    ]
+    assert result is not None
+    assert result.name == "Grace Hopper"
 
 
 @pytest.fixture()

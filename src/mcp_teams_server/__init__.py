@@ -174,10 +174,15 @@ async def get_member_by_name(
 
 
 @mcp.tool(name="list_members", description="List all members in the team")
-async def list_members(ctx: Context) -> list[TeamsMember]:
-    await ctx.debug("list_members")
+async def list_members(
+    ctx: Context,
+    page_size: int = Field(
+        description="Number of members to retrieve per request", default=100
+    ),
+) -> list[TeamsMember]:
+    await ctx.debug(f"list_members with page_size={page_size}")
     client = _get_teams_client(ctx)
-    return await client.list_members()
+    return await client.list_members(page_size)
 
 
 def _check_required_environment():
@@ -220,6 +225,7 @@ def main() -> None:
         mcp.run(transport=args.transport)
     except Exception as err:
         LOGGER.exception(err)
+
 
 if __name__ == "__main__":
     main()

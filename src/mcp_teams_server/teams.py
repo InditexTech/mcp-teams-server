@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field
 LOGGER = logging.getLogger(__name__)
 
 MCP_BOT_NAME = "MCP Bot"
+DEFAULT_MEMBER_PAGE_SIZE = 100
 
 
 class TeamsThread(BaseModel):
@@ -125,19 +126,24 @@ class TeamsClient:
     async def _get_mention_member(
         self, context: TurnContext, member_name: str | None
     ) -> TeamsChannelAccount | None:
-        mention_member = None
-        if member_name is not None:
-            continuation_token = ""
-            try:
-                members = await TeamsInfo.get_paged_team_members(
-                    context, self.teams_channel_id, 10, continuation_token
-                )
-                for member in members.members:
-                    if member.name == member_name:
-                        mention_member = member
-            except Exception as e:
-                LOGGER.exception(e)
-        return mention_member
+        if member_name is None:
+            return None
+
+        continuation_token = ""
+        while True:
+            members = await TeamsInfo.get_paged_team_members(
+                context,
+                self.teams_channel_id,
+                DEFAULT_MEMBER_PAGE_SIZE,
+                continuation_token,
+            )
+            for member in members.members:
+                if member.name == member_name:
+                    return member
+
+            continuation_token = members.continuation_token
+            if not continuation_token:
+                return None
 
     async def start_thread(
         self, title: str, content: str, member_name: str | None = None
@@ -176,7 +182,9 @@ class TeamsClient:
                 try:
                     activity = Activity(
                         type=ActivityTypes.message,
-                        from_property=ChannelAccount( id=self.teams_app_id, name=MCP_BOT_NAME), # type: ignore
+                        from_property=ChannelAccount(
+                            id=self.teams_app_id, name=MCP_BOT_NAME
+                        ),  # type: ignore
                         channel_id="msteams",  # type: ignore
                         conversation=context.activity.conversation,
                         topic_name=title,
@@ -244,8 +252,10 @@ class TeamsClient:
 
                 reply = Activity(
                     type=ActivityTypes.message,
-                    text=result.content if result.content is not None else '',
-                    from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
+                    text=result.content if result.content is not None else "",
+                    from_property=ChannelAccount(
+                        id=self.teams_app_id, name=MCP_BOT_NAME
+                    ),  # type: ignore
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
@@ -425,8 +435,13 @@ class TeamsClient:
             LOGGER.error(f"Error reading thread: {str(e)}")
             raise
 
-    async def list_members(self) -> list[TeamsMember]:
+    async def list_members(
+        self, page_size: int = DEFAULT_MEMBER_PAGE_SIZE
+    ) -> list[TeamsMember]:
         """List all members in the configured team.
+
+        Args:
+            page_size: Number of members to retrieve per request.
 
         Returns:
             List of team member details
@@ -437,14 +452,16 @@ class TeamsClient:
 
             async def list_members_callback(context: TurnContext):
                 continuation_token = ""
-                try:
+                while True:
                     members = await TeamsInfo.get_paged_team_members(
-                        context, self.teams_channel_id, 10, continuation_token
+                        context, self.teams_channel_id, page_size, continuation_token
                     )
                     for member in members.members:
                         result.append(TeamsMember(name=member.name, email=member.email))
-                except Exception as e:
-                    LOGGER.error(f"Error getting members: {str(e)}")
+
+                    continuation_token = members.continuation_token
+                    if not continuation_token:
+                        return
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
