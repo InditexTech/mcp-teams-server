@@ -31,12 +31,12 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --no-build --frozen --all-extras --dev --python 3.12
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Retrieve version
         shell: bash
         run: |
-          VERSION=$(uv run pyproject-info project.version | tr -d '"'); echo "VERSION=v$VERSION" >> "$GITHUB_ENV"
+          VERSION=$(uv run --no-build --no-sync pyproject-info project.version | tr -d '"'); echo "VERSION=v$VERSION" >> "$GITHUB_ENV"
 
       - name: Create Git Tag
         run: |

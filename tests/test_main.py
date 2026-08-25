@@ -50,6 +50,18 @@ def test_main_should_pass_env_transport_as_string():
     run.assert_called_once_with(transport="sse")
 
 
+def test_main_should_pass_streamable_http_transport_as_string():
+    test_args = ["main", "--transport", "streamable-http"]
+    env_vars = {var: "value" for var in mcp_teams_server.REQUIRED_ENV_VARS}
+
+    with patch.dict(os.environ, env_vars, clear=True):
+        with patch.object(sys, "argv", test_args):
+            with patch.object(mcp_teams_server.mcp, "run") as run:
+                main()
+
+    run.assert_called_once_with(transport="streamable-http")
+
+
 @pytest.mark.asyncio
 async def test_list_tools():
     tools = await mcp_teams_server.mcp.list_tools()
@@ -60,7 +72,7 @@ async def test_list_tools():
 @pytest.mark.asyncio
 async def test_tool_schemas_expose_input_validation_constraints():
     tools = await mcp_teams_server.mcp.list_tools()
-    schemas = {tool.name: tool.inputSchema for tool in tools}
+    schemas = {tool.name: tool.input_schema for tool in tools}
 
     start_thread_properties = schemas["start_thread"]["properties"]
     assert start_thread_properties["title"]["minLength"] == 1

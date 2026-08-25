@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added unit coverage for pagination, validation schemas, error propagation, and lifespan cleanup.
 
 ### Changed
+- Migrated from MCP Python SDK `1.28.1` to `2.1.0`.
+- Replaced `FastMCP` with `MCPServer` and updated tests for v2 snake_case protocol fields.
+- Added `streamable-http` transport support while retaining `sse` as a legacy option.
 - Hardened Teams message mapping for missing Graph response fields.
 - Improved exception logging and callback error propagation.
 

@@ -69,6 +69,14 @@ Start the server:
 uv run mcp-teams-server
 ```
 
+The default MCP transport is `stdio`. You can also use `streamable-http` for HTTP deployments:
+
+```bash
+uv run mcp-teams-server --transport streamable-http
+```
+
+The legacy `sse` transport is still available for older clients.
+
 ## Development
 
 Integration tests require the set-up the following environment variables:
@@ -113,6 +121,12 @@ Run with environment variables from .env file:
 
 ```bash
 docker run --env-file .env -it inditextech/mcp-teams-server
+```
+
+Run with Streamable HTTP transport:
+
+```bash
+docker run --env-file .env -p 8000:8000 -it inditextech/mcp-teams-server --transport streamable-http
 ```
 
 ### Setup LLM to use MCP Teams Server
