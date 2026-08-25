@@ -1,5 +1,4 @@
 name: Scorecard analysis workflow
-permissions: read-all
 on:
   push:
     # Only the default branch is supported.
@@ -13,6 +12,8 @@ jobs:
     permissions:
       # Needed for GitHub OIDC token if publish_results is true
       id-token: write
+      contents: read
+      packages: write
     steps:
       - name: "Checkout code"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4

@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.6"
+version = "1.0.12"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
@@ -9,16 +9,17 @@ maintainers = [
     { name = "Mariano Alonso Ortiz", email = "marianoao@inditex.com" },
 ]
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
-    "aiohttp==3.10.11",
-    "asyncio>=3.4.3",
-    "botbuilder-core>=4.17.0",
-    "botbuilder-integration-aiohttp>=4.17.0",
-    "dotenv>=0.9.9",
-    "mcp[cli]>=1.12.0",
-    "msgraph-sdk>=1.37.0",
-    "multidict>=6.6.3",
+    "microsoft-agents-authentication-msal>=0.8.0",
+    "microsoft-agents-activity>=0.8.0",
+    "microsoft-agents-hosting-core>=0.8.0",
+    "microsoft-agents-hosting-teams>=0.8.0",
+    "microsoft-agents-hosting-aiohttp>=0.8.0",
+    "python-dotenv>=1.2.1",
+    "mcp[cli]==2.1.0",
+    "msgraph-sdk>=1.61.0",
+    "setuptools>=83.0.0",
 ]
 
 [project.urls]
@@ -35,18 +36,24 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "mock>=5.2.0",
-    "pyproject-parser[cli]>=0.13.0",
-    "pyright>=1.1.398",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.25.3",
-    "pytest-cov>=6.0.0",
+    "pyproject-parser[cli]>=0.14.0",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
-    "ruff>=0.11.2",
+    "ruff>=0.16.4",
 ]
+
+[tool.uv]
+package = true
+
+[tool.uv.extra-build-dependencies]
+mcp-teams-server = ["setuptools"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]

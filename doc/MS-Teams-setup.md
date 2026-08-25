@@ -11,9 +11,8 @@ Then you will need to [add a client secret](https://learn.microsoft.com/en-us/en
 to your application. After this you will retrieve your client secret and store it in the environment variable 
 **TEAMS_APP_PASSWORD**.
 
-Your organization can either use a Single Tenant or Multi Tenant schema for managing identities. 
-In case you use a SingleTenant scheme, please store the tenant UUID in **TEAMS_APP_TENANT_ID** and 
-set **TEAMS_APP_TYPE** to SingleTenant.
+Your organization can either use a Single Tenant or Multi Tenant schema for managing identities.
+In case you use a SingleTenant scheme, please store the tenant UUID in **TEAMS_APP_TENANT_ID**.
 
 During development of this MCP Server we used SingleTenant authentication for our demo application 
 with client secret credentials.
@@ -40,7 +39,7 @@ The bot account is used only as a consumer for the Azure Bot REST api and you wi
 ![Azure Bot Channels](./images/azure_bot_channels.png)
 
 You will not need to deploy a Bot application in Azure or the Internet because this MCP server uses 
-Azure Bot Framework as a client to Bot Framework api.
+Microsoft Agents SDK as a client to microsoft apis.
 
 ### Microsoft Teams Application publishing
 

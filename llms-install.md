@@ -10,7 +10,7 @@ MCP Teams Server is a communication tool that allows AI assistants to interact w
 ### Prerequisites
 
 - [uv](https://github.com/astral-sh/uv) package manager
-- [Python 3.10](https://www.python.org/)
+- [Python 3.12](https://www.python.org/)
 - Microsoft Teams account with [proper set-up](./doc/MS-Teams-setup.md)
 
 ### Installation and configuration
@@ -40,8 +40,6 @@ Sample docker setup:
         "-e",
         "TEAMS_APP_PASSWORD",
         "-e",
-        "TEAMS_APP_TYPE",
-        "-e",
         "TEAMS_APP_TENANT_ID",
         "-e",
         "TEAM_ID",
@@ -52,7 +50,6 @@ Sample docker setup:
       "env": {
         "TEAMS_APP_ID": "<fill_me_with_proper_uuid>",
         "TEAMS_APP_PASSWORD": "<fill_me_with_proper_uuid>",
-        "TEAMS_APP_TYPE": "<fill_me_with_proper_uuid>",
         "TEAMS_APP_TENANT_ID": "<fill_me_with_proper_uuid>",
         "TEAM_ID": "<fill_me_with_proper_uuid>",
         "TEAMS_CHANNEL_ID": "<fill_me_with_proper_channel_id>",
@@ -73,7 +70,6 @@ Sample Cline setup with docker through WSL (Windows only):
       "args": [
         "TEAMS_APP_ID=<fill_me_with_proper_uuid>",
         "TEAMS_APP_PASSWORD=<fill_me_with_proper_uuid>",
-        "TEAMS_APP_TYPE=<fill_me_with_proper_uuid>",
         "TEAMS_APP_TENANT_ID=<fill_me_with_proper_uuid>",
         "TEAM_ID=<fill_me_with_proper_uuid>",
         "TEAMS_CHANNEL_ID=<fill_me_with_proper_uuid>",
@@ -108,7 +104,6 @@ Sample local development setup:
       "env": {
         "TEAMS_APP_ID": "<fill_me_with_proper_uuid>",
         "TEAMS_APP_PASSWORD": "<fill_me_with_proper_uuid>",
-        "TEAMS_APP_TYPE": "<fill_me_with_proper_uuid>",
         "TEAMS_APP_TENANT_ID": "<fill_me_with_proper_uuid>",
         "TEAM_ID": "<fill_me_with_proper_uuid>",
         "TEAMS_CHANNEL_ID": "<fill_me_with_proper_channel_id>"
@@ -146,6 +141,8 @@ Read replies in a thread
 
 **Parameters:**
 - `thread_id`: (Required) The thread ID as a string in the format '1743086901347'
+- `limit`: (Optional, default 50) Maximum number of replies to retrieve or page size
+- `cursor`: (Optional) Pagination cursor for the next page of results, returned by previous read_thread tool call.
 
 #### 4. list_threads
 
@@ -166,6 +163,9 @@ Get a member by its name
 
 List all members in the team
 
+**Parameters:**
+- `page_size`: (Optional, default 100) Number of members to retrieve per request
+
 ## Usage Examples
 
 Some ideas for user prompts are:
@@ -185,6 +185,4 @@ Please perform this task... and send results to a new thread in teams. Remember 
 ```
 Please read latest team threads and reply to threads that mention "Your bot name" 
 ```
-
-
 

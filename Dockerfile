@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.10-alpine
+FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 # ENV TEAMS_APP_ID="" TEAMS_APP_PASSWORD="" TEAMS_APP_TYPE="" TEAMS_APP_TENANT_ID="" TEAM_ID="" TEAMS_CHANNEL_ID=""
 
@@ -17,4 +17,9 @@ COPY pyproject.toml LICENSE.txt *.md uv.lock src /app/
 WORKDIR /app
 RUN uv sync --frozen --no-dev
 
-CMD ["uv", "run", "--frozen", "--no-dev", "mcp-teams-server"]
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+
+USER nonroot
+
+CMD ["uv", "run", "--no-build", "--frozen", "--no-dev", "mcp-teams-server"]
