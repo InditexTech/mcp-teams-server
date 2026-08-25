@@ -37,13 +37,13 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.12
+        run: uv sync --no-build --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
-        run: uv run pytest --cov-report term --cov-report xml:coverage-unit.xml --cov=.
+        run: uv run --no-build --no-sync pytest --cov-report term --cov-report xml:coverage-unit.xml --cov=.
 
       - name: Integration tests execution
-        run: uv run pytest -m integration --cov-report term --cov-report xml:coverage-integration.xml --cov=.
+        run: uv run --no-build --no-sync pytest -m integration --cov-report term --cov-report xml:coverage-integration.xml --cov=.
         env:
           TEAMS_APP_ID: ${{ vars.TEAMS_APP_ID }}
           TEAMS_APP_PASSWORD: ${{ secrets.TEAMS_APP_PASSWORD }}

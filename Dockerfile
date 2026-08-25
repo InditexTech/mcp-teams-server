@@ -13,13 +13,13 @@ LABEL \
 # Settings for faster container start
 ENV UV_COMPILE_BYTECODE=0 UV_PYTHON_DOWNLOADS=0 UV_LINK_MODE=copy
 
+COPY pyproject.toml LICENSE.txt *.md uv.lock src /app/
+WORKDIR /app
+RUN uv sync --frozen --no-dev
+
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
 
 USER nonroot
 
-COPY pyproject.toml LICENSE.txt *.md uv.lock src /app/
-WORKDIR /app
-RUN uv sync --frozen --no-dev
-
-CMD ["uv", "run", "--frozen", "--no-dev", "mcp-teams-server"]
+CMD ["uv", "run", "--no-build", "--frozen", "--no-dev", "mcp-teams-server"]
