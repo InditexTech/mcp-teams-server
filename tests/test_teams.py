@@ -60,6 +60,24 @@ class FakeMessagesRequestBuilder:
         return self.response
 
 
+class FakeTeamsConnectorClient:
+    def __init__(self, responses):
+        self.responses = responses
+        self.calls = []
+
+    async def get_conversation_paged_member(
+        self, conversation_id, page_size, continuation_token
+    ):
+        self.calls.append((conversation_id, page_size, continuation_token))
+        if isinstance(self.responses, list):
+            return self.responses.pop(0)
+        return self.responses
+
+    async def get_conversation_member(self, conversation_id, member_id):
+        self.calls.append((conversation_id, member_id))
+        return self.responses
+
+
 class FakeChannelRequestBuilder:
     def __init__(self, replies_builder, response=None):
         self.messages = FakeMessagesRequestBuilder(replies_builder, response)
@@ -83,19 +101,28 @@ class FakeTeamsRequestBuilder:
     def __init__(self, replies_builder, response=None):
         self.replies_builder = replies_builder
         self.response = response
+        self.team = FakeTeamRequestBuilder(self.replies_builder, self.response)
 
     def by_team_id(self, team_id):
-        return FakeTeamRequestBuilder(self.replies_builder, self.response)
+        return self.team
 
 
 class FakeAdapter:
     on_turn_error = None
 
+    def __init__(self, connector_client=None):
+        self.connector_client = connector_client
+
     async def continue_conversation(
         self, agent_app_id=None, continuation_activity=None, callback=None
     ):
         if callback is not None:
-            await callback(SimpleNamespace(activity=SimpleNamespace(service_url="url")))
+            await callback(
+                SimpleNamespace(
+                    activity=SimpleNamespace(service_url="url"),
+                    turn_state={"ConnectorClient": self.connector_client},
+                )
+            )
 
 
 class FakeStartThreadAdapter:
@@ -154,10 +181,10 @@ class FakeUpdateThreadAdapter:
         return self.response
 
 
-def create_test_client(adapter) -> TeamsClient:
+def create_test_client(adapter, graph_client=None) -> TeamsClient:
     return TeamsClient(
         cast(CloudAdapter, adapter),
-        cast(GraphServiceClient, SimpleNamespace()),
+        cast(GraphServiceClient, graph_client or SimpleNamespace()),
         teams_app_id="app-id",
         team_id="team-id",
         teams_channel_id="channel-id",
@@ -303,75 +330,88 @@ async def test_update_thread_raises_when_response_is_missing():
 
 @pytest.mark.asyncio
 async def test_list_members_reads_all_pages_with_configurable_page_size():
-    calls = []
     pages = [
         SimpleNamespace(
             members=[
-                SimpleNamespace(name="Ada Lovelace", email="ada@example.com"),
+                SimpleNamespace(
+                    id="member-1",
+                    name="Ada Lovelace",
+                    email="ada@example.com",
+                ),
             ],
-            continuation_token="next-page",
-        ),
-        SimpleNamespace(
-            members=[
-                SimpleNamespace(name="Grace Hopper", email="grace@example.com"),
-            ],
-            continuation_token=None,
-        ),
-    ]
-
-    async def get_paged_team_members(context, teams_channel_id, page_size, token):
-        calls.append((teams_channel_id, page_size, token))
-        return pages.pop(0)
-
-    client = create_test_client(FakeAdapter())
-
-    with patch(
-        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
-        side_effect=get_paged_team_members,
-    ):
-        result = await client.list_members(page_size=25)
-
-    assert calls == [("channel-id", 25, ""), ("channel-id", 25, "next-page")]
-    assert [member.name for member in result] == ["Ada Lovelace", "Grace Hopper"]
-
-
-@pytest.mark.asyncio
-async def test_get_mention_member_searches_all_pages():
-    calls = []
-    pages = [
-        SimpleNamespace(
-            members=[SimpleNamespace(name="Ada Lovelace", email="ada@example.com")],
             continuation_token="next-page",
         ),
         SimpleNamespace(
             members=[
                 SimpleNamespace(
-                    id="member-id", name="Grace Hopper", email="grace@example.com"
+                    id="member-2",
+                    name="Grace Hopper",
+                    email="grace@example.com",
                 ),
             ],
             continuation_token=None,
         ),
     ]
+    connector_client = FakeTeamsConnectorClient(pages)
+    client = create_test_client(FakeAdapter(connector_client))
 
-    async def get_paged_team_members(context, teams_channel_id, page_size, token):
-        calls.append((teams_channel_id, page_size, token))
-        return pages.pop(0)
+    with patch.object(
+        TeamsClient, "_get_teams_connector_client", return_value=connector_client
+    ):
+        result = await client.list_members(page_size=25)
 
-    client = create_test_client(FakeAdapter())
+    assert connector_client.calls == [
+        ("channel-id", 25, ""),
+        ("channel-id", 25, "next-page"),
+    ]
+    assert [member.name for member in result] == ["Ada Lovelace", "Grace Hopper"]
+    assert [member.id for member in result] == ["member-1", "member-2"]
 
-    with patch(
-        "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
-        side_effect=get_paged_team_members,
+
+@pytest.mark.asyncio
+async def test_get_mention_member_searches_all_pages():
+    pages = [
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(
+                    id="member-1",
+                    name="Ada Lovelace",
+                    email="ada@example.com",
+                )
+            ],
+            continuation_token="next-page",
+        ),
+        SimpleNamespace(
+            members=[
+                SimpleNamespace(
+                    id="member-id",
+                    name="Grace Hopper",
+                    email="grace@example.com",
+                ),
+            ],
+            continuation_token=None,
+        ),
+    ]
+    connector_client = FakeTeamsConnectorClient(pages)
+    client = create_test_client(FakeAdapter(connector_client))
+
+    with patch.object(
+        TeamsClient, "_get_teams_connector_client", return_value=connector_client
     ):
         result = await client._get_mention_member(
-            cast(TurnContext, SimpleNamespace()), "Grace Hopper"
+            cast(
+                TurnContext,
+                SimpleNamespace(turn_state={"ConnectorClient": connector_client}),
+            ),
+            "Grace Hopper",
         )
 
-    assert calls == [
+    assert connector_client.calls == [
         ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, ""),
         ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, "next-page"),
     ]
     assert result is not None
+    assert result.id == "member-id"
     assert result.name == "Grace Hopper"
 
 

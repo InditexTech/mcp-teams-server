@@ -1,4 +1,14 @@
-FROM ghcr.io/astral-sh/uv:python3.12-alpine
+FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
+
+# Settings for faster container start
+ENV UV_COMPILE_BYTECODE=1 UV_PYTHON_DOWNLOADS=0 UV_LINK_MODE=copy
+
+WORKDIR /app
+COPY pyproject.toml LICENSE.txt *.md uv.lock ./
+COPY src ./src
+RUN uv sync --frozen --no-dev --no-editable
+
+FROM python:3.12-alpine AS runtime
 
 # ENV TEAMS_APP_ID="" TEAMS_APP_PASSWORD="" TEAMS_APP_TYPE="" TEAMS_APP_TENANT_ID="" TEAM_ID="" TEAMS_CHANNEL_ID=""
 
@@ -10,16 +20,14 @@ LABEL \
   org.opencontainers.image.description="MCP Teams Server container image" \
   org.opencontainers.image.licenses="Apache-2.0"
 
-# Settings for faster container start
-ENV UV_COMPILE_BYTECODE=0 UV_PYTHON_DOWNLOADS=0 UV_LINK_MODE=copy
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
 
-COPY pyproject.toml LICENSE.txt *.md uv.lock src /app/
 WORKDIR /app
-RUN uv sync --frozen --no-dev
+COPY --from=builder /app/.venv /app/.venv
 
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
 
 USER nonroot
 
-CMD ["uv", "run", "--no-build", "--frozen", "--no-dev", "mcp-teams-server"]
+ENTRYPOINT ["mcp-teams-server"]

@@ -1064,7 +1064,7 @@ cli = [
 
 [[package]]
 name = "mcp-teams-server"
-version = "1.0.12"
+version = "1.0.13"
 source = { editable = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
@@ -1072,7 +1072,7 @@ dependencies = [
     { name = "microsoft-agents-authentication-msal" },
     { name = "microsoft-agents-hosting-aiohttp" },
     { name = "microsoft-agents-hosting-core" },
-    { name = "microsoft-agents-hosting-teams" },
+    { name = "microsoft-agents-hosting-msteams" },
     { name = "msgraph-sdk" },
     { name = "python-dotenv" },
     { name = "setuptools" },
@@ -1097,7 +1097,7 @@ requires-dist = [
     { name = "microsoft-agents-authentication-msal", specifier = ">=0.8.0" },
     { name = "microsoft-agents-hosting-aiohttp", specifier = ">=0.8.0" },
     { name = "microsoft-agents-hosting-core", specifier = ">=0.8.0" },
-    { name = "microsoft-agents-hosting-teams", specifier = ">=0.8.0" },
+    { name = "microsoft-agents-hosting-msteams", specifier = ">=0.8.0" },
     { name = "msgraph-sdk", specifier = ">=1.61.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "setuptools", specifier = ">=83.0.0" },
@@ -1194,17 +1194,18 @@ wheels = [
 ]
 
 [[package]]
-name = "microsoft-agents-hosting-teams"
+name = "microsoft-agents-hosting-msteams"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "microsoft-agents-hosting-core" },
     { name = "microsoft-teams-api" },
+    { name = "msgraph-sdk" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/f7/b2168de128e5e2a5cdf5835a9b2abdc6449c6c824fc8f726f4b8c4c1c7e7/microsoft_agents_hosting_teams-1.4.0.tar.gz", hash = "sha256:59d09f2e728b8224d933664cd27a45b60521f60b2cc935e4a192b0c146a03040", size = 18430, upload-time = "2026-08-18T21:07:23.261Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/bb/d66f785576fb566eb0ea61286352f855c50c6f6a78097f3f9168d1cd8cfa/microsoft_agents_hosting_msteams-1.4.0.tar.gz", hash = "sha256:8eacdffbed985ee6e506f44b874fd1e2769b8fdd6510164f498bd1c4636a9203", size = 38878, upload-time = "2026-08-18T21:07:21.249Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/a8/d9e814c41e88d6aa930397bf64eab2649e6d17018cc4a4f8e34c5ff76059/microsoft_agents_hosting_teams-1.4.0-py3-none-any.whl", hash = "sha256:67b179dd46bf896c8ee16a2dbf1da9a20e9a0d573c0c6ad52759011ca7a29647", size = 17633, upload-time = "2026-08-18T21:07:36.724Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/51/0a1f4764c2d9864a287acdc850b7dcb1f1f57797878fe5c264c862ea7490/microsoft_agents_hosting_msteams-1.4.0-py3-none-any.whl", hash = "sha256:a5525258f29067e15effbdb0c3c2c92fc5e5a4e1433d3c397cc84b156ed3ce76", size = 47279, upload-time = "2026-08-18T21:07:34.886Z" },
 ]
 
 [[package]]
