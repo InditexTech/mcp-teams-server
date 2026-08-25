@@ -254,10 +254,10 @@ class TeamsClient:
 
     @staticmethod
     def _get_teams_connector_client(context: TurnContext) -> TeamsConnectorClient:
-        connector_client = context.turn_state["ConnectorClient"]
+        connector_client = context.turn_state.get("ConnectorClient")
         if isinstance(connector_client, TeamsConnectorClient):
             return connector_client
-        return connector_client  # type: ignore
+        raise TypeError("ConnectorClient is not a TeamsConnectorClient")
 
     async def update_thread(
         self, thread_id: str, content: str, member_name: str | None = None

@@ -5,6 +5,7 @@ import os
 import sys
 from types import SimpleNamespace
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 from azure.identity.aio import ClientSecretCredential
@@ -354,7 +355,10 @@ async def test_list_members_reads_all_pages_with_configurable_page_size():
     connector_client = FakeTeamsConnectorClient(pages)
     client = create_test_client(FakeAdapter(connector_client))
 
-    result = await client.list_members(page_size=25)
+    with patch.object(
+        TeamsClient, "_get_teams_connector_client", return_value=connector_client
+    ):
+        result = await client.list_members(page_size=25)
 
     assert connector_client.calls == [
         ("channel-id", 25, ""),
@@ -391,13 +395,16 @@ async def test_get_mention_member_searches_all_pages():
     connector_client = FakeTeamsConnectorClient(pages)
     client = create_test_client(FakeAdapter(connector_client))
 
-    result = await client._get_mention_member(
-        cast(
-            TurnContext,
-            SimpleNamespace(turn_state={"ConnectorClient": connector_client}),
-        ),
-        "Grace Hopper",
-    )
+    with patch.object(
+        TeamsClient, "_get_teams_connector_client", return_value=connector_client
+    ):
+        result = await client._get_mention_member(
+            cast(
+                TurnContext,
+                SimpleNamespace(turn_state={"ConnectorClient": connector_client}),
+            ),
+            "Grace Hopper",
+        )
 
     assert connector_client.calls == [
         ("channel-id", DEFAULT_MEMBER_PAGE_SIZE, ""),
