@@ -18,6 +18,7 @@ from pydantic import Field
 
 from .config import BotConfiguration
 from .teams import (
+    DEFAULT_MEMBER_PAGE_SIZE,
     PagedTeamsMessages,
     TeamsClient,
     TeamsMember,
@@ -51,6 +52,8 @@ REQUIRED_ENV_VARS = [
     "TEAM_ID",
     "TEAMS_CHANNEL_ID",
 ]
+MAX_THREAD_PAGE_SIZE = 50
+MAX_MEMBER_PAGE_SIZE = 100
 
 
 @dataclass
@@ -108,10 +111,12 @@ def _get_teams_client(ctx: Context) -> TeamsClient:
 )
 async def start_thread(
     ctx: Context,
-    title: str = Field(description="The thread title"),
-    content: str = Field(description="The thread content"),
+    title: str = Field(description="The thread title", min_length=1),
+    content: str = Field(description="The thread content", min_length=1),
     member_name: str | None = Field(
-        description="Member name to mention in the thread", default=None
+        description="Member name to mention in the thread",
+        default=None,
+        min_length=1,
     ),
 ) -> TeamsThread:
     await ctx.debug(f"start_thread with title={title} and content={content}")
@@ -125,11 +130,16 @@ async def start_thread(
 async def update_thread(
     ctx: Context,
     thread_id: str = Field(
-        description="The thread ID as a string in the format '1743086901347'"
+        description="The thread ID as a string in the format '1743086901347'",
+        min_length=1,
     ),
-    content: str = Field(description="The content to update in the thread"),
+    content: str = Field(
+        description="The content to update in the thread", min_length=1
+    ),
     member_name: str | None = Field(
-        description="Member name to mention in the thread", default=None
+        description="Member name to mention in the thread",
+        default=None,
+        min_length=1,
     ),
 ) -> TeamsMessage:
     await ctx.debug(f"update_thread with thread_id={thread_id} and content={content}")
@@ -141,7 +151,8 @@ async def update_thread(
 async def read_thread(
     ctx: Context,
     thread_id: str = Field(
-        description="The thread ID as a string in the format '1743086901347'"
+        description="The thread ID as a string in the format '1743086901347'",
+        min_length=1,
     ),
 ) -> PagedTeamsMessages:
     await ctx.debug(f"read_thread with thread_id={thread_id}")
@@ -153,10 +164,15 @@ async def read_thread(
 async def list_threads(
     ctx: Context,
     limit: int = Field(
-        description="Maximum number of items to retrieve or page size", default=50
+        description="Maximum number of items to retrieve or page size",
+        default=MAX_THREAD_PAGE_SIZE,
+        ge=1,
+        le=MAX_THREAD_PAGE_SIZE,
     ),
     cursor: str | None = Field(
-        description="Pagination cursor for the next page of results", default=None
+        description="Pagination cursor for the next page of results",
+        default=None,
+        min_length=1,
     ),
 ) -> PagedTeamsMessages:
     await ctx.debug(f"list_threads with cursor={cursor} and limit={limit}")
@@ -166,7 +182,7 @@ async def list_threads(
 
 @mcp.tool(name="get_member_by_name", description="Get a member by its name")
 async def get_member_by_name(
-    ctx: Context, name: str = Field(description="Member name")
+    ctx: Context, name: str = Field(description="Member name", min_length=1)
 ):
     await ctx.debug(f"get_member_by_name with name={name}")
     client = _get_teams_client(ctx)
@@ -177,7 +193,10 @@ async def get_member_by_name(
 async def list_members(
     ctx: Context,
     page_size: int = Field(
-        description="Number of members to retrieve per request", default=100
+        description="Number of members to retrieve per request",
+        default=DEFAULT_MEMBER_PAGE_SIZE,
+        ge=1,
+        le=MAX_MEMBER_PAGE_SIZE,
     ),
 ) -> list[TeamsMember]:
     await ctx.debug(f"list_members with page_size={page_size}")
