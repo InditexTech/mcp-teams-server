@@ -1,0 +1,21 @@
+src/mcp_teams_server/teams.py
+  s_6074f87ff69da1::t_b1154087b9dea6 182-193,195-196,198-203,277-280
+tests/test_teams.py
+  s_6074f87ff69da1::t_1dc77973681978 13,90-155,214-239,262,296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f7719648d504e93bc7ebb496df05da37d3e71002",
+  "prompts": {},
+  "sessions": {
+    "s_6074f87ff69da1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fc82cb22fffe6MaummfHXb7zcq",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
