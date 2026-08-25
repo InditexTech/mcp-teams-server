@@ -1,0 +1,16 @@
+src/mcp_teams_server/teams.py
+  h_8fe143308bc629 257,260
+tests/test_teams.py
+  h_8fe143308bc629 8,358-361,398-407
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a25c17ff320ef7afade78c1e8e1f524e7a3c0f33",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
