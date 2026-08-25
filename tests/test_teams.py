@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pytest
 from azure.identity.aio import ClientSecretCredential
 from dotenv import load_dotenv
+from microsoft_agents.activity import ConversationAccount
 from microsoft_agents.authentication.msal import MsalConnectionManager
 from microsoft_agents.hosting.aiohttp import CloudAdapter
 from microsoft_agents.hosting.core import TurnContext
@@ -86,6 +87,72 @@ class FakeAdapter:
             await callback(SimpleNamespace(activity=SimpleNamespace(service_url="url")))
 
 
+class FakeStartThreadAdapter:
+    on_turn_error = None
+
+    def __init__(self, responses=None, exception=None):
+        self.responses = responses
+        self.exception = exception
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(
+                SimpleNamespace(
+                    activity=SimpleNamespace(
+                        service_url="url",
+                        conversation=ConversationAccount(id="conversation-id"),
+                    )
+                )
+            )
+
+    async def send_activities(self, context, activities):
+        if self.exception is not None:
+            raise self.exception
+        return self.responses
+
+
+class FakeUpdateThreadAdapter:
+    on_turn_error = None
+
+    def __init__(self, response=None):
+        self.response = response
+
+    async def continue_conversation(
+        self, agent_app_id=None, continuation_activity=None, callback=None
+    ):
+        if callback is not None:
+            await callback(
+                SimpleNamespace(
+                    activity=SimpleNamespace(
+                        service_url="url",
+                        conversation=ConversationAccount(id="conversation-id"),
+                    ),
+                    turn_state={
+                        "ConnectorClient": SimpleNamespace(
+                            conversations=SimpleNamespace(
+                                send_to_conversation=self.send_to_conversation
+                            )
+                        )
+                    },
+                )
+            )
+
+    async def send_to_conversation(self, conversation_id, body):
+        return self.response
+
+
+def create_test_client(adapter) -> TeamsClient:
+    return TeamsClient(
+        cast(CloudAdapter, adapter),
+        cast(GraphServiceClient, SimpleNamespace()),
+        teams_app_id="app-id",
+        team_id="team-id",
+        teams_channel_id="channel-id",
+    )
+
+
 @pytest.fixture()
 def setup_teams_client() -> TeamsClient:
     # Cloud adapter
@@ -145,6 +212,32 @@ async def test_read_thread_replies_returns_next_page_cursor():
 
 
 @pytest.mark.asyncio
+async def test_start_thread_raises_when_send_fails():
+    client = create_test_client(
+        FakeStartThreadAdapter(exception=RuntimeError("send failed"))
+    )
+
+    with pytest.raises(RuntimeError, match="send failed"):
+        await client.start_thread("title", "content")
+
+
+@pytest.mark.asyncio
+async def test_start_thread_raises_when_response_is_missing():
+    client = create_test_client(FakeStartThreadAdapter(responses=[]))
+
+    with pytest.raises(RuntimeError, match="thread creation response"):
+        await client.start_thread("title", "content")
+
+
+@pytest.mark.asyncio
+async def test_update_thread_raises_when_response_is_missing():
+    client = create_test_client(FakeUpdateThreadAdapter(response=None))
+
+    with pytest.raises(RuntimeError, match="thread update response"):
+        await client.update_thread("thread-id", "content")
+
+
+@pytest.mark.asyncio
 async def test_list_members_reads_all_pages_with_configurable_page_size():
     calls = []
     pages = [
@@ -166,13 +259,7 @@ async def test_list_members_reads_all_pages_with_configurable_page_size():
         calls.append((teams_channel_id, page_size, token))
         return pages.pop(0)
 
-    client = TeamsClient(
-        cast(CloudAdapter, FakeAdapter()),
-        cast(GraphServiceClient, SimpleNamespace()),
-        teams_app_id="app-id",
-        team_id="team-id",
-        teams_channel_id="channel-id",
-    )
+    client = create_test_client(FakeAdapter())
 
     with patch(
         "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",
@@ -206,13 +293,7 @@ async def test_get_mention_member_searches_all_pages():
         calls.append((teams_channel_id, page_size, token))
         return pages.pop(0)
 
-    client = TeamsClient(
-        cast(CloudAdapter, FakeAdapter()),
-        cast(GraphServiceClient, SimpleNamespace()),
-        teams_app_id="app-id",
-        team_id="team-id",
-        teams_channel_id="channel-id",
-    )
+    client = create_test_client(FakeAdapter())
 
     with patch(
         "mcp_teams_server.teams.TeamsInfo.get_paged_team_members",

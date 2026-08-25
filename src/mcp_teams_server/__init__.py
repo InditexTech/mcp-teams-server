@@ -84,7 +84,10 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         bot_config["TEAM_ID"],
         bot_config["TEAMS_CHANNEL_ID"],
     )
-    yield AppContext(client=client)
+    try:
+        yield AppContext(client=client)
+    finally:
+        await credentials.close()
 
 
 mcp = FastMCP(

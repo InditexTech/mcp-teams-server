@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 import sys
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -85,3 +86,33 @@ async def test_tool_schemas_expose_input_validation_constraints():
     list_members_properties = schemas["list_members"]["properties"]
     assert list_members_properties["page_size"]["minimum"] == 1
     assert list_members_properties["page_size"]["maximum"] == MAX_MEMBER_PAGE_SIZE
+
+
+@pytest.mark.asyncio
+async def test_app_lifespan_closes_credentials():
+    credentials = SimpleNamespace(close=AsyncMock())
+    env_vars = {var: "value" for var in mcp_teams_server.REQUIRED_ENV_VARS}
+
+    with patch.dict(os.environ, env_vars, clear=True):
+        with patch.object(
+            mcp_teams_server, "ClientSecretCredential", return_value=credentials
+        ):
+            with patch.object(
+                mcp_teams_server,
+                "MsalConnectionManager",
+                return_value=SimpleNamespace(),
+            ):
+                with patch.object(
+                    mcp_teams_server, "CloudAdapter", return_value=SimpleNamespace()
+                ):
+                    with patch.object(
+                        mcp_teams_server,
+                        "GraphServiceClient",
+                        return_value=SimpleNamespace(),
+                    ):
+                        async with mcp_teams_server.app_lifespan(
+                            mcp_teams_server.mcp
+                        ) as context:
+                            assert context.client is not None
+
+    credentials.close.assert_awaited_once()

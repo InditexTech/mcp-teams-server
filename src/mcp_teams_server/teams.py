@@ -179,27 +179,28 @@ class TeamsClient:
                     )
                     mentions.append(mention)
 
-                try:
-                    activity = Activity(
-                        type=ActivityTypes.message,
-                        from_property=ChannelAccount(
-                            id=self.teams_app_id, name=MCP_BOT_NAME
-                        ),  # type: ignore
-                        channel_id="msteams",  # type: ignore
-                        conversation=context.activity.conversation,
-                        topic_name=title,
-                        text=result.content,
-                        text_format=TextFormatTypes.markdown,
-                        entities=mentions,
+                activity = Activity(
+                    type=ActivityTypes.message,
+                    from_property=ChannelAccount(
+                        id=self.teams_app_id, name=MCP_BOT_NAME
+                    ),  # type: ignore
+                    channel_id="msteams",  # type: ignore
+                    conversation=context.activity.conversation,
+                    topic_name=title,
+                    text=result.content,
+                    text_format=TextFormatTypes.markdown,
+                    entities=mentions,
+                )
+
+                responses = await self.adapter.send_activities(context, [activity])
+                response = responses[0] if responses else None
+
+                if response is None:
+                    raise RuntimeError(
+                        "Teams did not return a thread creation response"
                     )
 
-                    responses = await self.adapter.send_activities(context, [activity])
-                    response = responses[0] if responses else None
-
-                    if response is not None:
-                        result.thread_id = response.id
-                except Exception as ae:
-                    LOGGER.exception(ae)
+                result.thread_id = response.id
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
@@ -273,8 +274,10 @@ class TeamsClient:
                     conversation_id=conversation_id, body=reply
                 )
 
-                if response is not None:
-                    result.message_id = response.id  # pyright: ignore
+                if response is None:
+                    raise RuntimeError("Teams did not return a thread update response")
+
+                result.message_id = response.id  # pyright: ignore
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,
