@@ -1,0 +1,14 @@
+.github/workflows/PR-verify.yml
+  h_8fe143308bc629 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d2c6d4a84cd04540fcc611e8471078fe2b599ffd",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
