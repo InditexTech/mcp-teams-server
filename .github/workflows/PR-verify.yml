@@ -23,11 +23,11 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.12
+          uv sync --no-build --frozen --all-extras --dev --python 3.12
 
       - name: Ruff check
         run: |
-          uv run --no-sync ruff check .
+          uv run --no-build --no-sync ruff check .
 
   check-typing:
     runs-on: ubuntu-latest
@@ -46,11 +46,11 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.12
+          uv sync --no-build --frozen --all-extras --dev --python 3.12
 
       - name: Pyright type checking
         run: |
-          uv run --no-sync pyright
+          uv run --no-build --no-sync pyright
 
   run-tests:
     runs-on: ubuntu-latest
@@ -69,11 +69,11 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.12
+          uv sync --no-build --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
         run: |
-          uv run pytest
+          uv run --no-build --no-sync test
 
   repo-linter:
     name: Repo Linter

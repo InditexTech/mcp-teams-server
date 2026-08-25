@@ -31,7 +31,7 @@ jobs:
 
       - name: Sync project
         run: |
-          uv sync --frozen --all-extras --dev --python 3.12
+          uv sync --no-build --frozen --all-extras --dev --python 3.12
 
       - name: Retrieve version
         shell: bash
