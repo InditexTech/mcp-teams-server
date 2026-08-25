@@ -1,0 +1,22 @@
+Dockerfile
+  h_8fe143308bc629 1-11,23,26,33
+pyproject.toml
+  h_8fe143308bc629 3,17
+src/mcp_teams_server/teams.py
+  h_8fe143308bc629 19,52,68-76,136,140,142-143,145,149-150,153-180,255-261,337,340-345,489,491-492,494-495
+tests/test_teams.py
+  h_8fe143308bc629 62-79,103,106,112-114,119-124,183,186,335-339,345-349,354-355,357,359-362,364,371-377,383-385,391-392,394-400,402,407
+uv.lock
+  h_8fe143308bc629 1067,1075,1100,1197,1204,1206,1208
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4f2345f1e336d1e5e8e715704bfcfebb9b25aca2",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
