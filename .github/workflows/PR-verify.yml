@@ -73,7 +73,7 @@ jobs:
 
       - name: Unit tests execution
         run: |
-          uv run --no-sync test
+          uv run --no-sync pytest
 
   repo-linter:
     name: Repo Linter
