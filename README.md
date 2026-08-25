@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/548a9768-1119-4a2d-bd5c-6b41069fc522
 ## Prerequisites
 
 - [uv](https://github.com/astral-sh/uv) package manager
-- [Python 3.10](https://www.python.org/)
+- [Python 3.12](https://www.python.org/)
 - Microsoft Teams account with [proper set-up](./doc/MS-Teams-setup.md)
 
 ## Installation
@@ -61,7 +61,6 @@ as a template:
 |-------------------------|--------------------------------------------|
 | **TEAMS_APP_ID**        | UUID for your MS Entra ID application ID   |
 | **TEAMS_APP_PASSWORD**  | Client secret                              |
-| **TEAMS_APP_TYPE**      | SingleTenant or MultiTenant                |
 | **TEAMS_APP_TENANT_ID** | Tenant uuid in case of SingleTenant        |
 | **TEAM_ID**             | MS Teams Group Id or Team Id               |
 | **TEAMS_CHANNEL_ID**    | MS Teams Channel ID with url escaped chars |
@@ -71,6 +70,14 @@ Start the server:
 ```bash
 uv run mcp-teams-server
 ```
+
+The default MCP transport is `stdio`. You can also use `streamable-http` for HTTP deployments:
+
+```bash
+uv run mcp-teams-server --transport streamable-http
+```
+
+The legacy `sse` transport is still available for older clients.
 
 ## Development
 
@@ -116,6 +123,12 @@ Run with environment variables from .env file:
 
 ```bash
 docker run --env-file .env -it inditextech/mcp-teams-server
+```
+
+Run with Streamable HTTP transport:
+
+```bash
+docker run --env-file .env -p 8000:8000 -it inditextech/mcp-teams-server --transport streamable-http
 ```
 
 ### Setup LLM to use MCP Teams Server

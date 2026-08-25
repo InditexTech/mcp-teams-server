@@ -1,14 +1,15 @@
 name: Pull Request verification
-permissions:
-  contents: read
 
 on:
   pull_request:
   workflow_dispatch:
 
+
 jobs:
   check-format:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -21,13 +22,17 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.12
 
-      - name: Ruff format check
-        run: uv run --no-sync ruff check .
+      - name: Ruff check
+        run: |
+          uv run --no-build --no-sync ruff check .
 
   check-typing:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -40,13 +45,17 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Pyright type checking
-        run: uv run --no-sync pyright
+        run: |
+          uv run --no-build --no-sync pyright
 
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -59,14 +68,18 @@ jobs:
           enable-cache: true
 
       - name: Sync project
-        run: uv sync --frozen --all-extras --dev --python 3.10
+        run: |
+          uv sync --frozen --all-extras --dev --python 3.12
 
       - name: Unit tests execution
-        run: uv run pytest
+        run: |
+          uv run --no-sync test
 
   repo-linter:
     name: Repo Linter
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -82,17 +95,17 @@ jobs:
       - name: Execute Repo Linter
         run: |
           echo "Installing Repo Linter"
-          npm install -g repolinter@v0.11.2
-          
+          npm install --ignore-scripts -g repolinter@v0.11.2
           echo "Executing Repo Linter"
           repolinter --rulesetFile repolinter.json --dryRun .
-          
           echo "Repo Linter execution completed"
 
 
   reuse-compliance:
     name: REUSE Compliance
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -102,4 +115,3 @@ jobs:
 
       - name: REUSE Compliance Check
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
-
