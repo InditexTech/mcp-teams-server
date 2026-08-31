@@ -1033,7 +1033,7 @@ wheels = [
 
 [[package]]
 name = "mcp"
-version = "2.1.0"
+version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -1051,9 +1051,9 @@ dependencies = [
     { name = "typing-inspection" },
     { name = "uvicorn", marker = "sys_platform != 'emscripten'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c9/3b/3acf4897b934ceeb8d22df7309a435a76c34f94be936b36eee8bb57b29a3/mcp-2.1.0.tar.gz", hash = "sha256:b4407b2890238248795d03e8c17d02d311c600ca9272d023ab12dbfa6ad21c70", size = 3983282, upload-time = "2026-08-24T19:04:32.671Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/6e/21fb8e5d579dbe21d96ea4d5034200d46d8bdf2261053b5bd041f3c2f612/mcp-2.1.1.tar.gz", hash = "sha256:50b7ba1ebbe117008ea7bdd288234043e69c20b403d6851d19661e6d431a75ef", size = 3984589, upload-time = "2026-08-25T16:14:02.376Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/67/b2160b6cf138872860d2552cca2894dbe4d29da7f1c6fae0c21d22782838/mcp-2.1.0-py3-none-any.whl", hash = "sha256:b8acaed6ca4b9376801377463e44246395749363b1c34467ec6243a50be5ed28", size = 357320, upload-time = "2026-08-24T19:04:29.909Z" },
+    { url = "https://files.pythonhosted.org/packages/50/af/8644cc5fa26a59afd2df2e98eeb19e72926887fa4b7441aba4ff661140db/mcp-2.1.1-py3-none-any.whl", hash = "sha256:1c6c31c5d6471c58db76af3af8af67f46d11d01f0a59077d0a308cbdb3d3e915", size = 357912, upload-time = "2026-08-25T16:13:59.024Z" },
 ]
 
 [package.optional-dependencies]
@@ -1092,7 +1092,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mcp", extras = ["cli"], specifier = "==2.1.0" },
+    { name = "mcp", extras = ["cli"], specifier = "==2.1.1" },
     { name = "microsoft-agents-activity", specifier = ">=0.8.0" },
     { name = "microsoft-agents-authentication-msal", specifier = ">=0.8.0" },
     { name = "microsoft-agents-hosting-aiohttp", specifier = ">=0.8.0" },
@@ -1117,15 +1117,15 @@ dev = [
 
 [[package]]
 name = "mcp-types"
-version = "2.1.0"
+version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/97/5b1c2e40d6121172c97638a0f1d6240526f5aeebdc9ebea11ddcf2139249/mcp_types-2.1.0.tar.gz", hash = "sha256:16f91064ce33d7ee7a75a7e198a437172215180c16d4bbcfa0e61488ede92c54", size = 66679, upload-time = "2026-08-24T19:04:34.13Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/dd/1c4417dc0b722c23a1669032d5f044e41170fe5d4773b488a50fcce98c32/mcp_types-2.1.1.tar.gz", hash = "sha256:77dcbe48fba73cca71a673f2646a5f037a017b7a0a07ac89cec1113028890eda", size = 66674, upload-time = "2026-08-25T16:14:03.861Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/99/f9041368b5af773de32af6192ff0627a71368c240123e57262439ae5b594/mcp_types-2.1.0-py3-none-any.whl", hash = "sha256:6a65bfb7d057ceaf2418781ee61b3041e1f4b5418199297f8939a4b4ed334c3a", size = 69654, upload-time = "2026-08-24T19:04:31.327Z" },
+    { url = "https://files.pythonhosted.org/packages/71/d0/242e63c510f4a17381f55b1549a3f94f5687a0595984febd2b6f87a687a0/mcp_types-2.1.1-py3-none-any.whl", hash = "sha256:26f9f7f03f2a5730717a5b98e2ab7eb640ac352d05a00cdc725c311864778295", size = 69656, upload-time = "2026-08-25T16:14:00.667Z" },
 ]
 
 [[package]]
