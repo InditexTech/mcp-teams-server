@@ -5,18 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.14]
+
+### Changed
+- Upgraded project dependencies.
+
+### Fixed
+- Restricted Graph pagination cursors to the configured team, channel, and thread
+  (reported by Syed Anas Mohiuddin).
+- Corrected the documented scope of Microsoft Graph channel-message permissions.
+
+## [1.0.13] - 2026-08-25
+
+### Changed
+- Migrated Teams integration from `microsoft-agents-hosting-teams` to
+  `microsoft-agents-hosting-msteams`.
+- Reworked member paging and lookup to use the Microsoft Teams connector client.
+- Hardened the Docker image with a multi-stage build and a minimal non-root runtime.
+
+## [1.0.12] - 2026-08-25
 
 ### Added
 - Added configurable member paging and complete member lookup across all pages.
-- Added MCP input validation for required strings, pagination limits, cursors, and member page size.
+- Added MCP input validation for required strings, pagination limits, cursors, and
+  member page size.
 - Added pagination support to the `read_thread` tool.
-- Added unit coverage for pagination, validation schemas, error propagation, and lifespan cleanup.
+- Added `streamable-http` transport support while retaining `sse` as a legacy
+  option.
+- Added unit coverage for pagination, validation schemas, error propagation, and
+  lifespan cleanup.
 
 ### Changed
 - Migrated from MCP Python SDK `1.28.1` to `2.1.0`.
-- Replaced `FastMCP` with `MCPServer` and updated tests for v2 snake_case protocol fields.
-- Added `streamable-http` transport support while retaining `sse` as a legacy option.
+- Replaced `FastMCP` with `MCPServer` and updated tests for v2 snake_case protocol
+  fields.
 - Hardened Teams message mapping for missing Graph response fields.
 - Improved exception logging and callback error propagation.
 

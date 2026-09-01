@@ -19,9 +19,11 @@ with client secret credentials.
 
 ![Client Secret Credentials](./images/azure_app_client_credentials.png)
 
-It is also necessary to setup Microsoft Graph API "ChannelMessage.Read.All" permission. 
-This permission is a "Resource Specific Consent" and can be scoped to the team or group where the teams 
-application (explained later) is installed.
+Reading messages requires a Microsoft Graph channel-message application permission.
+`ChannelMessage.Read.All` grants tenant-wide access and cannot be scoped to a team or
+group. Prefer the Resource Specific Consent permission `ChannelMessage.Read.Group` in
+the Teams application manifest when access should be limited to teams where the
+application is installed.
 
 ![MS Graph API Permissions](./images/azure_msgraph_api_permissions.png)
 

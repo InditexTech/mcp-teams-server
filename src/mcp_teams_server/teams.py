@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 INDUSTRIA DE DISEÑO TEXTIL, S.A. (INDITEX, S.A.)
 # SPDX-License-Identifier: Apache-2.0
 import logging
+from urllib.parse import unquote, urlparse
 
 from kiota_abstractions.base_request_configuration import RequestConfiguration
 from microsoft_agents.activity import (
@@ -93,6 +94,34 @@ class TeamsClient:
 
     def get_team_id(self):
         return self.team_id
+
+    def _validate_pagination_cursor(
+        self, cursor: str, thread_id: str | None = None
+    ) -> str:
+        path = f"/v1.0/teams/{self.team_id}/channels/{self.teams_channel_id}/messages"
+        if thread_id is not None:
+            if (
+                unquote(thread_id) != thread_id
+                or "/" in thread_id
+                or "\\" in thread_id
+                or thread_id in {".", ".."}
+            ):
+                raise ValueError("Invalid pagination cursor for the configured channel")
+            path = f"{path}/{thread_id}/replies"
+
+        parsed_cursor = urlparse(cursor)
+        decoded_path = unquote(parsed_cursor.path)
+        if (
+            parsed_cursor.scheme != "https"
+            or parsed_cursor.netloc != "graph.microsoft.com"
+            or decoded_path != path
+            or "\\" in decoded_path
+            or any(segment in {".", ".."} for segment in decoded_path.split("/"))
+            or parsed_cursor.fragment
+        ):
+            raise ValueError("Invalid pagination cursor for the configured channel")
+
+        return cursor
 
     @staticmethod
     async def on_turn_error(context: TurnContext, error: Exception):
@@ -373,6 +402,7 @@ class TeamsClient:
             )
             request = RequestConfiguration(query_parameters=query)
             if cursor is not None:
+                cursor = self._validate_pagination_cursor(cursor)
                 response = (
                     await self.graph_client.teams.by_team_id(self.team_id)
                     .channels.by_channel_id(self.teams_channel_id)
@@ -431,6 +461,7 @@ class TeamsClient:
             request = RequestConfiguration(query_parameters=params)
 
             if cursor is not None:
+                cursor = self._validate_pagination_cursor(cursor, thread_id)
                 replies = (
                     await self.graph_client.teams.by_team_id(self.team_id)
                     .channels.by_channel_id(self.teams_channel_id)

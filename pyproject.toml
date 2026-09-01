@@ -1,6 +1,6 @@
 [project]
 name = "mcp-teams-server"
-version = "1.0.13"
+version = "1.0.14"
 description = "An MCP server implementation for Microsoft Teams integration"
 readme = "README.md"
 keywords = ["mcp", "llm", "automation", "Microsoft Teams"]
@@ -11,15 +11,15 @@ maintainers = [
 license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
 dependencies = [
-    "microsoft-agents-authentication-msal>=0.8.0",
-    "microsoft-agents-activity>=0.8.0",
-    "microsoft-agents-hosting-core>=0.8.0",
-    "microsoft-agents-hosting-msteams>=0.8.0",
-    "microsoft-agents-hosting-aiohttp>=0.8.0",
-    "python-dotenv>=1.2.1",
-    "mcp[cli]==2.1.0",
+    "microsoft-agents-authentication-msal>=1.5.0",
+    "microsoft-agents-activity>=1.5.0",
+    "microsoft-agents-hosting-core>=1.5.0",
+    "microsoft-agents-hosting-msteams>=1.5.0",
+    "microsoft-agents-hosting-aiohttp>=1.5.0",
+    "python-dotenv>=1.2.3",
+    "mcp[cli]==2.1.1",
     "msgraph-sdk>=1.61.0",
-    "setuptools>=83.0.0",
+    "setuptools>=84.0.0",
 ]
 
 [project.urls]
@@ -42,7 +42,7 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
-    "ruff>=0.16.4",
+    "ruff>=0.16.5",
 ]
 
 [tool.uv]
