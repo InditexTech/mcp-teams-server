@@ -33,6 +33,11 @@ LOGGER = logging.getLogger(__name__)
 class FakeRepliesRequestBuilder:
     def __init__(self, response):
         self.response = response
+        self.url = None
+
+    def with_url(self, url):
+        self.url = url
+        return self
 
     async def get(self, request_configuration=None):
         return self.response
@@ -247,6 +252,97 @@ async def test_read_thread_replies_returns_next_page_cursor():
     assert result.limit == 25
     assert result.total == 1
     assert result.items[0].message_id == "reply-id"
+
+
+@pytest.mark.asyncio
+async def test_read_threads_accepts_cursor_for_configured_channel():
+    graph_response = SimpleNamespace(odata_next_link=None, value=[])
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(None, graph_response)),
+    )
+    client = create_test_client(SimpleNamespace(), graph_client)
+    cursor = (
+        "https://graph.microsoft.com/v1.0/teams/team%2Did/channels/"
+        "channel%2Did/messages?$skiptoken=opaque"
+    )
+
+    result = await client.read_threads(cursor=cursor)
+
+    assert result.items == []
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_accepts_cursor_for_configured_thread():
+    graph_response = SimpleNamespace(odata_next_link=None, value=[])
+    replies_builder = FakeRepliesRequestBuilder(graph_response)
+    graph_client = cast(
+        GraphServiceClient,
+        SimpleNamespace(teams=FakeTeamsRequestBuilder(replies_builder)),
+    )
+    client = create_test_client(SimpleNamespace(), graph_client)
+    cursor = (
+        "https://graph.microsoft.com/v1.0/teams/team%2Did/channels/"
+        "channel%2Did/messages/thread%2Did/replies?$skiptoken=opaque"
+    )
+
+    result = await client.read_thread_replies("thread-id", cursor=cursor)
+
+    assert result.items == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "cursor",
+    [
+        "https://graph.microsoft.com/v1.0/teams/other-team/channels/channel-id/messages?$skiptoken=opaque",
+        "https://graph.microsoft.com/v1.0/teams/team-id/channels/other-channel/messages?$skiptoken=opaque",
+        "https://example.com/v1.0/teams/team-id/channels/channel-id/messages?$skiptoken=opaque",
+    ],
+)
+async def test_read_threads_rejects_cursor_outside_configured_channel(cursor):
+    client = create_test_client(SimpleNamespace())
+
+    with pytest.raises(ValueError, match="Invalid pagination cursor"):
+        await client.read_threads(cursor=cursor)
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_rejects_cursor_for_another_thread():
+    client = create_test_client(SimpleNamespace())
+    cursor = (
+        "https://graph.microsoft.com/v1.0/teams/team-id/channels/channel-id/"
+        "messages/other-thread/replies?$skiptoken=opaque"
+    )
+
+    with pytest.raises(ValueError, match="Invalid pagination cursor"):
+        await client.read_thread_replies("thread-id", cursor=cursor)
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_rejects_path_traversal_in_thread_id():
+    client = create_test_client(SimpleNamespace())
+    thread_id = "../../../../other-team/channels/other-channel/messages/thread-id"
+    cursor = (
+        "https://graph.microsoft.com/v1.0/teams/team-id/channels/channel-id/"
+        f"messages/{thread_id}/replies?$skiptoken=opaque"
+    )
+
+    with pytest.raises(ValueError, match="Invalid pagination cursor"):
+        await client.read_thread_replies(thread_id, cursor=cursor)
+
+
+@pytest.mark.asyncio
+async def test_read_thread_replies_rejects_encoded_thread_id():
+    client = create_test_client(SimpleNamespace())
+    thread_id = "%2e%2e%2fother-thread"
+    cursor = (
+        "https://graph.microsoft.com/v1.0/teams/team-id/channels/channel-id/"
+        "messages/%252e%252e%252fother-thread/replies?$skiptoken=opaque"
+    )
+
+    with pytest.raises(ValueError, match="Invalid pagination cursor"):
+        await client.read_thread_replies(thread_id, cursor=cursor)
 
 
 @pytest.mark.asyncio
