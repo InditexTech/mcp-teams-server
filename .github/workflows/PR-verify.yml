@@ -48,9 +48,9 @@ jobs:
         run: |
           uv sync --frozen --all-extras --dev --python 3.12
 
-      - name: Pyright type checking
+      - name: Ty type checking
         run: |
-          uv run --no-build --no-sync pyright
+          uv run --no-build --no-sync ty check
 
   run-tests:
     runs-on: ubuntu-latest
