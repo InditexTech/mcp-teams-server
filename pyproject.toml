@@ -37,12 +37,12 @@ build-backend = "hatchling.build"
 dev = [
     "mock>=5.2.0",
     "pyproject-parser[cli]>=0.14.0",
-    "pyright>=1.1.411",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "reuse>=5.0.2",
     "ruff>=0.16.5",
+    "ty>=0.0.77",
 ]
 
 [tool.uv]
@@ -61,6 +61,9 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "src/mcp_teams_server/teams.py" = ["E501"]
+
+[tool.ty.rules]
+deprecated = "ignore"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

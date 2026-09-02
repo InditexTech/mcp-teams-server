@@ -138,8 +138,8 @@ class TeamsClient:
         return Activity(
             type=ActivityTypes.conversation_update,
             service_url=service_url,
-            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),  # type: ignore
-            channel_id="msteams",  # type: ignore
+            from_property=ChannelAccount(id=self.teams_app_id, name=MCP_BOT_NAME),
+            channel_id="msteams",
             conversation=ConversationAccount(
                 id=self.teams_channel_id,
                 is_group=True,
@@ -245,8 +245,8 @@ class TeamsClient:
                     type=ActivityTypes.message,
                     from_property=ChannelAccount(
                         id=self.teams_app_id, name=MCP_BOT_NAME
-                    ),  # type: ignore
-                    channel_id="msteams",  # type: ignore
+                    ),
+                    channel_id="msteams",
                     conversation=context.activity.conversation,
                     topic_name=title,
                     text=result.content,
@@ -325,7 +325,7 @@ class TeamsClient:
                     text=result.content if result.content is not None else "",
                     from_property=ChannelAccount(
                         id=self.teams_app_id, name=MCP_BOT_NAME
-                    ),  # type: ignore
+                    ),
                     conversation=ConversationAccount(id=thread_id),
                     entities=mentions,
                 )
@@ -337,7 +337,7 @@ class TeamsClient:
                 # Hack to reply to conversation https://github.com/microsoft/botframework-sdk/issues/6626
                 #
                 conversation_id = (
-                    f"{context.activity.conversation.id};messageid={thread_id}"  # pyright: ignore
+                    f"{context.activity.conversation.id};messageid={thread_id}"
                 )
                 response = await conversations.send_to_conversation(
                     conversation_id=conversation_id, body=reply
@@ -346,7 +346,7 @@ class TeamsClient:
                 if response is None:
                     raise RuntimeError("Teams did not return a thread update response")
 
-                result.message_id = response.id  # pyright: ignore
+                result.message_id = response.id
 
             await self.adapter.continue_conversation(
                 agent_app_id=self.teams_app_id,

@@ -61,7 +61,7 @@ uv run ruff format .
 It is recommended to run a type checker:
 
 ```bash
-uv run pyright
+uv run ty check
 ```
 
 ## Technical details
