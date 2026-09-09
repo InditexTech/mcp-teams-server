@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/548a9768-1119-4a2d-bd5c-6b41069fc522
 1. Clone the repository:
 
 ```bash
-git clone [repository-url]
+git clone https://github.com/InditexTech/mcp-teams-server
 cd mcp-teams-server
 ```
 

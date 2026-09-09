@@ -26,7 +26,7 @@ this project.
 
 ## Contribution Guidelines
 
-- All contributors are expected to follow the project's [code of conduct](CODE_of_CONDUCT.md). Please be respectful and
+- All contributors are expected to follow the project's [code of conduct](CODE_OF_CONDUCT.md). Please be respectful and
 considerate towards other contributors.
 - Before starting work on a new feature or fix, check existing [issues](../../issues) and [pull requests](../../pulls)
 to avoid duplications and unnecessary discussions.
@@ -71,10 +71,10 @@ It uses FastMCP to implement tools offered by the MCP server.
 
 This MCP server consumes two Microsoft APIs / frameworks:
 
-- [Azure Bot Builder](https://github.com/microsoft/botbuilder-python) for python
+- [Microsoft Agents SDK](https://github.com/Microsoft/Agents-for-python) for python
 - [Microsoft Graph SDK](https://github.com/microsoftgraph/msgraph-sdk-python) for python
 
-Azure Bot Builder allows a bot (Microsoft Entra ID app) to consume a Microsoft REST API to send messages to channels 
+Microsoft Agents SDK allows a bot (Microsoft Entra ID app) to consume a Microsoft REST API to send messages to channels 
 (but it is not capable of consuming messages because the bot is not deployed in Azure). The REST API client is 
 encapsulated inside the framework classes, and it is not used directly.
 In order to send messages without actually being deployed in Azure, the bot "continues" a conversation to retrieve 
