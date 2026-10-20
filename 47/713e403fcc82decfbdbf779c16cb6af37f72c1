@@ -1,0 +1,22 @@
+.github/workflows/PR-verify.yml
+  h_8fe143308bc629 14,20,37,43,60,66,85,91,93,111
+.github/workflows/release.yml
+  h_8fe143308bc629 23,28,52,59,63,72,82
+.github/workflows/scorecard-analysis.yml
+  h_8fe143308bc629 19,39,43
+.github/workflows/sonar-cloud-analysis.yml
+  h_8fe143308bc629 29,35
+pyproject.toml
+  h_8fe143308bc629 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "47713e403fcc82decfbdbf779c16cb6af37f72c1",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
