@@ -1,6 +1,6 @@
 ### Release process
 
-Review and integrate desired works and PRs into master branch before launching a release.
+Review and integrate desired works and PRs into main branch before launching a release.
 
 Release process is triggered from a PR labeled with "kind/release" label.
 
