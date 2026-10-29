@@ -8,6 +8,17 @@ updates:
   - package-ecosystem: "uv" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       - dependency-name: "aiohttp"
+    groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      versions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+
