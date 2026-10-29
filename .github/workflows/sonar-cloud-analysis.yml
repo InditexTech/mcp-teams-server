@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [ closed ]
-    branches: [ 'master' ]
+    branches: [ 'main' ]
   release:
     types:
       - published
@@ -18,7 +18,7 @@ jobs:
   unit-tests:
     name: Tests
     timeout-minutes: 30
-    if: ${{ ((github.event.pull_request.merged == true && github.base_ref == 'master') ||
+    if: ${{ ((github.event.pull_request.merged == true && github.base_ref == 'main') ||
       (github.event_name == 'workflow_dispatch' ||
       github.event_name == 'release'))
       && vars.IS_INDITEXTECH_REPO == 'true' }}

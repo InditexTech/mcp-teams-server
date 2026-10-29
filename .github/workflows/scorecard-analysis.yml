@@ -2,7 +2,7 @@ name: Scorecard analysis workflow
 on:
   push:
     # Only the default branch is supported.
-    branches: [ 'master' ]
+    branches: [ 'main' ]
 
 
 jobs:

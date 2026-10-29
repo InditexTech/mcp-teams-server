@@ -45,7 +45,7 @@ Microsoft Agents SDK as a client to microsoft apis.
 
 ### Microsoft Teams Application publishing
 
-There is a skeleton for this kind of applications in the [app folder](https://github.com/InditexTech/mcp-teams-server/tree/master/app). 
+There is a skeleton for this kind of applications in the [app folder](https://github.com/InditexTech/mcp-teams-server/tree/main/app). 
 This skeleton can be used after replacing `{{MICROSOFT_APP_ID}}` by your **TEAMS_APP_ID**, 
 using your own icons and zipping the directory to deploy it as an application into Microsoft Teams.
 
