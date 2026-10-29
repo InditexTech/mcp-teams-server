@@ -1,0 +1,22 @@
+.github/workflows/release.yml
+  h_8fe143308bc629 6
+.github/workflows/scorecard-analysis.yml
+  h_8fe143308bc629 5
+.github/workflows/sonar-cloud-analysis.yml
+  h_8fe143308bc629 12,21
+RELEASE.md
+  h_8fe143308bc629 3,11
+doc/MS-Teams-setup.md
+  h_8fe143308bc629 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "09ce67973a268be37e436236b6ee26ecbfa98f58",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
