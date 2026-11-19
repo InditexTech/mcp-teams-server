@@ -61,6 +61,7 @@ log/
 logs/
 
 # Local development
+AGENTS.md
 .env.local
 .env.development.local
 .env.test.local
