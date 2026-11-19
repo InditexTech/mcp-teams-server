@@ -1,0 +1,14 @@
+.gitignore
+  h_8fe143308bc629 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "02ca9dc7eee8bd2e3484ac92f195472a1960192d",
+  "prompts": {},
+  "humans": {
+    "h_8fe143308bc629": {
+      "author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}
